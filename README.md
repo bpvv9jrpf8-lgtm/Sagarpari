@@ -17,8 +17,8 @@
 3. Thik bhaye **Merge** thichnus → 1–2 minute ma website ma aauchha
 4. Thik nabhaye **Close** garnus
 
-## Cloudflare Pages setting
+## Cloudflare setting (Workers)
 
-- Framework preset: None
-- Build command: `node build.js`
-- Build output directory: `dist`
+- Build command: `npm run build`
+- Deploy command: `npx wrangler deploy`
+- Setting `wrangler.jsonc` ma chha (website `dist/` folder bata)

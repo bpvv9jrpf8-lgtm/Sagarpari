@@ -1,6 +1,6 @@
 # SagarPari — news site for Nepalis living in the USA
 
-Static site. `node build.js` turns `content/` into `dist/`. No npm dependencies. Hosted on Cloudflare Pages (build command `node build.js`, output `dist`).
+Static site. `node build.js` turns `content/` into `dist/`. No npm dependencies. Hosted on Cloudflare Workers static assets (build command `npm run build`, deploy `npx wrangler deploy`, config in `wrangler.jsonc`). Every push to `main` redeploys.
 
 ## Adding an article
 
