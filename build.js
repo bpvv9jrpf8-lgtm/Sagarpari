@@ -116,6 +116,7 @@ const nav = (active) =>
       .join("")}
   </ul></nav>`;
 
+const coverWave = `<svg class="cover-wave" viewBox="0 0 200 40" preserveAspectRatio="none" aria-hidden="true"><path d="M0 20 Q 12.5 8 25 20 T 50 20 T 75 20 T 100 20 T 125 20 T 150 20 T 175 20 T 200 20 V40 H0Z" fill="currentColor"/></svg>`;
 const wave = `<svg class="wave" viewBox="0 0 1200 14" preserveAspectRatio="none" aria-hidden="true"><path d="M0 7 Q 25 0 50 7 T 100 7 T 150 7 T 200 7 T 250 7 T 300 7 T 350 7 T 400 7 T 450 7 T 500 7 T 550 7 T 600 7 T 650 7 T 700 7 T 750 7 T 800 7 T 850 7 T 900 7 T 950 7 T 1000 7 T 1050 7 T 1100 7 T 1150 7 T 1200 7" fill="none" stroke="currentColor" stroke-width="2"/></svg>`;
 
 function layout({ title, description, url, body, active, ogType = "website", extraHead = "", image }) {
@@ -154,14 +155,15 @@ ${extraHead}
       <span class="brand-name">सागरपारि</span>
       <span class="brand-tag">${esc(site.tagline)}</span>
     </a>
+    <p class="today" id="today"></p>
     <div class="clocks" aria-label="अहिलेको समय">
       <div><span class="clock-place">न्युयोर्क</span><time class="clock" data-tz="America/New_York">--:--</time></div>
       <div><span class="clock-place">काठमाडौं</span><time class="clock" data-tz="Asia/Kathmandu">--:--</time></div>
     </div>
   </div>
   <div class="wrap">${wave}</div>
-  <div class="wrap">${nav(active)}</div>
 </header>
+<div class="navbar"><div class="wrap nav-row">${nav(active)}<a class="search-link" href="/search/" aria-label="खोज्नुहोस्"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M20 20l-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></a></div></div>
 <main id="main" class="wrap">
 ${body}
 </main>
@@ -173,6 +175,7 @@ ${body}
     </div>
     <ul class="foot-links">
       ${pages.map((p) => `<li><a href="${p.url}">${esc(p.title)}</a></li>`).join("")}
+      <li><a href="/search/">खोज्नुहोस्</a></li>
       <li><a href="/feed.xml">RSS</a></li>
     </ul>
   </div>
@@ -185,20 +188,37 @@ ${body}
     try{el.textContent=new Intl.DateTimeFormat('ne-NP',{hour:'numeric',minute:'2-digit',timeZone:el.dataset.tz}).format(new Date());}catch(e){}
   });}
   tick();setInterval(tick,30000);
+  var t=document.getElementById('today');if(t){try{t.textContent=new Intl.DateTimeFormat('ne-NP',{weekday:'long',year:'numeric',month:'long',day:'numeric',timeZone:'America/New_York'}).format(new Date())}catch(e){}}
 })();
 </script>
 </body>
 </html>`;
 }
 
+const readMins = (p) => Math.max(1, Math.round(p.html.replace(/<[^>]+>/g, " ").split(/\s+/).filter(Boolean).length / 180));
+const neNum = (n) => new Intl.NumberFormat("ne-NP").format(n);
+
 const meta = (p) =>
   `<p class="meta"><a class="cat-tag" href="/category/${p.cat.slug}/">${p.cat.name}</a><time datetime="${p.date.toISOString()}">${fmtDate(p.date)}</time></p>`;
 
-const storyItem = (p) => `<li class="story">
-  ${meta(p)}
-  <h3><a href="${p.url}">${esc(p.title)}</a></h3>
-  ${p.summary ? `<p class="dek">${esc(p.summary)}</p>` : ""}
+// Photo if we have one, otherwise a branded cover in the category colour (no copyright risk).
+const thumb = (p, cls = "") =>
+  `<a href="${p.url}" class="thumb ${cls}" tabindex="-1" aria-hidden="true" style="--c:${p.cat.color}">${
+    p.image
+      ? `<img src="${p.image}" alt="" loading="lazy">`
+      : `<span class="cover"><span class="cover-cat">${p.cat.name}</span>${coverWave}</span>`
+  }</a>`;
+
+const storyItem = (p, opts = {}) => `<li class="story${opts.thumb ? " has-thumb" : ""}">
+  ${opts.thumb ? thumb(p, "sm") : ""}
+  <div>
+    ${meta(p)}
+    <h3><a href="${p.url}">${esc(p.title)}</a></h3>
+    ${p.summary && !opts.noDek ? `<p class="dek">${esc(p.summary)}</p>` : ""}
+  </div>
 </li>`;
+
+const headlineItem = (p) => `<li class="headline"><a href="${p.url}">${esc(p.title)}</a><span class="when">${fmtDate(p.date)}</span></li>`;
 
 const emptyState = `<div class="empty"><p>यहाँ अहिलेसम्म कुनै खबर छैन। नयाँ खबर चाँडै आउँदैछ।</p></div>`;
 
@@ -209,31 +229,81 @@ copyDir(path.join(ROOT, "static"), OUT);
 // Home
 {
   const [lead, ...rest] = posts;
-  const latest = rest.slice(0, 6);
-  const more = rest.slice(6, 30);
+  const seconds = rest.slice(0, 2);
+  const latest = rest.slice(2, 10);
+  const recentBreaking = posts.find((p) => p.breaking === true && Date.now() - p.date < 48 * 3600 * 1000);
+  const blocks = site.categories
+    .map((c) => ({ c, list: posts.filter((p) => p.category === c.slug && p !== lead) }))
+    .filter((b) => b.list.length);
   const body = lead
-    ? `<section class="front">
+    ? `${recentBreaking ? `<a class="breaking" href="${recentBreaking.url}"><span class="breaking-tag">ब्रेकिङ</span><span>${esc(recentBreaking.title)}</span></a>` : ""}
+      <section class="front">
         <article class="lead">
+          ${thumb(lead, "lg")}
           ${meta(lead)}
           <h2><a href="${lead.url}">${esc(lead.title)}</a></h2>
-          ${lead.image ? `<a href="${lead.url}" class="lead-img"><img src="${lead.image}" alt="${esc(lead.imageAlt || "")}"></a>` : ""}
           ${lead.summary ? `<p class="dek">${esc(lead.summary)}</p>` : ""}
         </article>
+        ${seconds.length ? `<div class="seconds">${seconds
+          .map((p) => `<article class="second">${thumb(p)}${meta(p)}<h3><a href="${p.url}">${esc(p.title)}</a></h3></article>`)
+          .join("")}</div>` : ""}
         <aside class="latest" aria-labelledby="latest-h">
           <h2 id="latest-h" class="section-h">ताजा खबर</h2>
-          ${latest.length ? `<ul class="story-list">${latest.map(storyItem).join("")}</ul>` : `<p class="muted">थप खबर चाँडै।</p>`}
+          ${latest.length ? `<ol class="headline-list">${latest.map(headlineItem).join("")}</ol>` : `<p class="muted">थप खबर चाँडै।</p>`}
         </aside>
       </section>
-      ${more.length ? `<section><h2 class="section-h">थप खबर</h2><ul class="story-grid">${more.map(storyItem).join("")}</ul></section>` : ""}`
+      ${blocks
+        .map(
+          ({ c, list }) => `<section class="block" style="--c:${c.color}">
+        <header class="block-h"><h2><a href="/category/${c.slug}/">${c.name}</a></h2><a class="more" href="/category/${c.slug}/">सबै हेर्नुहोस्</a></header>
+        <div class="block-body">
+          <article class="block-lead">${thumb(list[0])}<h3><a href="${list[0].url}">${esc(list[0].title)}</a></h3>${list[0].summary ? `<p class="dek">${esc(list[0].summary)}</p>` : ""}</article>
+          ${list.length > 1 ? `<ul class="story-list">${list.slice(1, 5).map((p) => storyItem(p, { thumb: true, noDek: true })).join("")}</ul>` : ""}
+        </div>
+      </section>`
+        )
+        .join("")}`
     : emptyState;
   write("index.html", layout({ url: "/", body, active: "home" }));
 }
+
+// Search page + index
+write(
+  "search.json",
+  JSON.stringify(posts.map((p) => ({ t: p.title, s: p.summary || "", u: p.url, c: p.cat.name, d: fmtDate(p.date) })))
+);
+write(
+  "search/index.html",
+  layout({
+    title: "खोज्नुहोस्",
+    url: "/search/",
+    body: `<header class="page-h"><h1>खोज्नुहोस्</h1></header>
+    <form class="search-form" role="search" onsubmit="return false">
+      <label for="q" class="sr">खबर खोज्नुहोस्</label>
+      <input id="q" type="search" placeholder="जस्तै: ग्रीन कार्ड, ट्याक्स, TPS" autocomplete="off">
+    </form>
+    <p id="search-status" class="muted" aria-live="polite"></p>
+    <ul id="results" class="story-grid"></ul>
+    <script>
+    (function(){
+      var q=document.getElementById('q'),out=document.getElementById('results'),st=document.getElementById('search-status'),data=[];
+      function e(s){return s.replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+      function run(){var v=q.value.trim().toLowerCase();if(!v){out.innerHTML='';st.textContent='';return}
+        var r=data.filter(function(x){return (x.t+' '+x.s+' '+x.c).toLowerCase().indexOf(v)>-1});
+        st.textContent=r.length?r.length+' वटा खबर भेटियो':'"'+q.value+'" सँग मिल्ने खबर भेटिएन। अर्को शब्द प्रयोग गर्नुहोस्।';
+        out.innerHTML=r.map(function(x){return '<li class="story"><p class="meta"><span class="cat-tag">'+e(x.c)+'</span><span>'+e(x.d)+'</span></p><h3><a href="'+x.u+'">'+e(x.t)+'</a></h3><p class="dek">'+e(x.s)+'</p></li>'}).join('')}
+      fetch('/search.json').then(function(r){return r.json()}).then(function(d){data=d;var p=new URLSearchParams(location.search).get('q');if(p){q.value=p}run()});
+      q.addEventListener('input',run);q.focus();
+    })();
+    </script>`,
+  })
+);
 
 // Category pages
 for (const c of site.categories) {
   const list = posts.filter((p) => p.category === c.slug);
   const body = `<header class="page-h"><h1>${c.name}</h1><p class="muted">${esc(c.description || "")}</p></header>
-    ${list.length ? `<ul class="story-grid">${list.map(storyItem).join("")}</ul>` : emptyState}`;
+    ${list.length ? `<ul class="story-grid">${list.map((p) => storyItem(p, { thumb: true })).join("")}</ul>` : emptyState}`;
   write(`category/${c.slug}/index.html`, layout({ title: c.name, description: c.description, url: `/category/${c.slug}/`, body, active: c.slug }));
 }
 
@@ -264,7 +334,7 @@ for (const p of posts) {
       ${meta(p)}
       <h1>${esc(p.title)}</h1>
       ${p.summary ? `<p class="standfirst">${esc(p.summary)}</p>` : ""}
-      <p class="byline">${esc(p.author || "सागरपारि डेस्क")} · ${fmtDateTime(p.date)}${p.updated ? ` · अद्यावधिक: ${fmtDate(new Date(p.updated))}` : ""}</p>
+      <p class="byline">${esc(p.author || "सागरपारि डेस्क")} · ${fmtDateTime(p.date)} · ${neNum(readMins(p))} मिनेट पढाइ${p.updated ? ` · अद्यावधिक: ${fmtDate(new Date(p.updated))}` : ""}</p>
     </header>
     ${p.image ? `<figure class="hero-img"><img src="${p.image}" alt="${esc(p.imageAlt || "")}">${p.imageCredit ? `<figcaption>${esc(p.imageCredit)}</figcaption>` : ""}</figure>` : ""}
     <div class="prose">${p.html}</div>
@@ -276,7 +346,7 @@ for (const p of posts) {
       <a href="https://x.com/intent/post?url=${shareUrl}" target="_blank" rel="noopener">X</a>
     </div>
   </article>
-  ${related.length ? `<section class="related"><h2 class="section-h">${p.cat.name}का अरू खबर</h2><ul class="story-grid">${related.map(storyItem).join("")}</ul></section>` : ""}`;
+  ${related.length ? `<section class="related"><h2 class="section-h">${p.cat.name}का अरू खबर</h2><ul class="story-grid">${related.map((p) => storyItem(p, { thumb: true, noDek: true })).join("")}</ul></section>` : ""}`;
   write(
     `news/${p.slug}/index.html`,
     layout({
