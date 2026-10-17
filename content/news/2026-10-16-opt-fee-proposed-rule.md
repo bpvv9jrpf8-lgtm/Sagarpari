@@ -7,6 +7,9 @@ source: Federal Register (DHS/ICE)
 sourceUrl: https://www.federalregister.gov/documents/2026/10/08/2026-20660/optional-practical-training-fees
 source1: Federal Register (आधिकारिक PDF, govinfo.gov)
 sourceUrl1: https://www.govinfo.gov/content/pkg/FR-2026-10-08/pdf/2026-20660.pdf
+image: /images/2026-10-16-opt-fee-proposed-rule.png
+imageAlt: स्नातक टोपी र प्रमाणपत्रको चित्र
+imageCredit: चित्र: सागरपारि ग्राफिक
 author: सागरपारि डेस्क
 draft: false
 ---

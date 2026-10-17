@@ -7,6 +7,9 @@ source: The Kathmandu Post
 sourceUrl: https://kathmandupost.com/national/2026/10/16/nepal-declares-flood-and-landslide-hit-areas-in-three-districts-disaster-zones
 source1: myRepublica
 sourceUrl1: https://myrepublica.nagariknetwork.com/news/cabinet-declares-five-local-units-disaster-hit-zones-sets-wheat-support-pri-63-37.html
+image: /images/2026-10-16-nepal-flood-update.png
+imageAlt: हिमाल, नदी र झोलुंगे पुलको चित्र
+imageCredit: चित्र: सागरपारि ग्राफिक
 author: सागरपारि डेस्क
 draft: false
 ---

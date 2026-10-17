@@ -5,6 +5,9 @@ category: immigration
 summary: DHS ले Form I-129 एक्सटेन्सनमा USCIS ले पहिलेको स्वीकृतिलाई "deference" दिने नियम हटाउन प्रस्ताव गरेको छ। सुझाव १३ नोभेम्बरसम्म दिन सकिन्छ।
 source: Federal Register (DHS/USCIS)
 sourceUrl: https://www.federalregister.gov/documents/2026/10/14/2026-20941/removing-deference-to-prior-uscis-determinations-of-eligibility
+image: /images/2026-10-16-h1b-extension-deference-rule.png
+imageAlt: ब्रिफकेस, पासपोर्ट र घडीको चित्र
+imageCredit: चित्र: सागरपारि ग्राफिक
 author: सागरपारि डेस्क
 draft: false
 ---
