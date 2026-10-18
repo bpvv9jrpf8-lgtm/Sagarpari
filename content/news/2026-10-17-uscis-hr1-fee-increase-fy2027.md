@@ -7,7 +7,7 @@ source: Federal Register (USCIS सूचना)
 sourceUrl: https://public-inspection.federalregister.gov/2026-20187.pdf
 source1: Federal Register (DHS: प्यारोल, I-94, ESTA शुल्क)
 sourceUrl1: https://www.federalregister.gov/documents/2026/10/01/2026-20185/certain-dhs-immigration-related-fees-required-by-hr-1-fiscal-year-2027-adjustments-for-inflation
-image: /images/2026-10-17-uscis-hr1-fee-increase-fy2027.svg
+image: /images/2026-10-17-uscis-hr1-fee-increase-fy2027.png
 imageAlt: शुल्क रसिद, सुनका सिक्का र माथि जाने रातो तीरको चित्र
 imageCredit: चित्र: सागरपारि ग्राफिक
 author: सागरपारि डेस्क
