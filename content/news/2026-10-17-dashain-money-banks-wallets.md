@@ -9,6 +9,9 @@ source1: Onlinekhabar English (वालेट सीमा)
 sourceUrl1: https://english.onlinekhabar.com/wallets-can-be-loaded-up-to-50-times-a-day-during-festive-season.html
 source2: ShareSansar (टीकाको साइत)
 sourceUrl2: https://www.sharesansar.com/newsdetail/dashain-tika-sait-fixed-for-1026-am-on-kartik-4-2026-10-07
+image: /images/2026-10-17-dashain-money-banks-wallets.png
+imageAlt: मोबाइल वालेट, टीकाको थाली र जमराको चित्र
+imageCredit: चित्र: सागरपारि ग्राफिक
 author: सागरपारि डेस्क
 draft: false
 ---
