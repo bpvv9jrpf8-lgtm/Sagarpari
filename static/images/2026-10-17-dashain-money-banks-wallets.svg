@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675">
+<rect width="1200" height="675" fill="#F7F1E3"/>
+<circle cx="150" cy="120" r="13" fill="#E89628"/>
+<circle cx="196" cy="88" r="9" fill="#C8871A"/>
+<circle cx="1050" cy="110" r="12" fill="#E89628"/>
+<circle cx="1108" cy="168" r="8" fill="#C8871A"/>
+<circle cx="88" cy="220" r="8" fill="#C8871A"/>
+<circle cx="1085" cy="520" r="10" fill="#E89628"/>
+<circle cx="120" cy="540" r="9" fill="#C8871A"/>
+<rect x="155" y="120" width="265" height="440" rx="30" fill="#262C34"/>
+<rect x="168" y="133" width="239" height="414" rx="20" fill="#FCF8EC"/>
+<rect x="260" y="146" width="55" height="12" rx="6" fill="#262C34"/>
+<rect x="197" y="230" width="181" height="145" rx="16" fill="#107560"/>
+<circle cx="275" cy="303" r="42" fill="none" stroke="#F3E6BE" stroke-width="5"/>
+<text x="275" y="304" font-family="DejaVu Sans, Arial, sans-serif" font-size="52" font-weight="bold" fill="#F3E6BE" text-anchor="middle" dominant-baseline="central">$</text>
+<rect x="330" y="280" width="44" height="22" rx="11" fill="#FFFFFF"/>
+<rect x="330" y="316" width="44" height="22" rx="11" fill="#AACDB3"/>
+<rect x="197" y="412" width="181" height="24" rx="12" fill="#E0D6BE"/>
+<rect x="197" y="452" width="133" height="24" rx="12" fill="#E0D6BE"/>
+<rect x="227" y="496" width="131" height="48" rx="24" fill="#8C5C0A"/>
+<line x1="455" y1="300" x2="560" y2="300" stroke="#8C5C0A" stroke-width="12"/>
+<polygon points="548,276 596,300 548,324" fill="#8C5C0A"/>
+<polygon points="696,448 728,448 715,268" fill="#5F8F3E"/>
+<polygon points="730,448 762,448 749,196" fill="#7FB069"/>
+<polygon points="764,448 796,448 783,248" fill="#E9C46A"/>
+<polygon points="798,448 830,448 817,178" fill="#5F8F3E"/>
+<polygon points="834,448 866,448 853,232" fill="#7FB069"/>
+<polygon points="870,448 902,448 889,192" fill="#E9C46A"/>
+<polygon points="906,448 938,448 925,252" fill="#5F8F3E"/>
+<polygon points="938,448 970,448 957,282" fill="#7FB069"/>
+<polygon points="725,506 935,506 902,448 758,448" fill="#B07834"/>
+<ellipse cx="830" cy="422" rx="95" ry="30" fill="#B07834"/>
+<ellipse cx="830" cy="464" rx="215" ry="56" fill="#C8871A" stroke="#8C5C0A" stroke-width="4"/>
+<ellipse cx="830" cy="464" rx="168" ry="36" fill="#DEA42C"/>
+<circle cx="1022" cy="464" r="9" fill="#E89628"/>
+<circle cx="996" cy="490" r="9" fill="#E89628"/>
+<circle cx="926" cy="509" r="9" fill="#E89628"/>
+<circle cx="830" cy="516" r="9" fill="#E89628"/>
+<circle cx="734" cy="509" r="9" fill="#E89628"/>
+<circle cx="664" cy="490" r="9" fill="#E89628"/>
+<circle cx="638" cy="464" r="9" fill="#E89628"/>
+<circle cx="664" cy="438" r="9" fill="#E89628"/>
+<circle cx="734" cy="419" r="9" fill="#E89628"/>
+<circle cx="830" cy="412" r="9" fill="#E89628"/>
+<circle cx="926" cy="419" r="9" fill="#E89628"/>
+<circle cx="996" cy="438" r="9" fill="#E89628"/>
+<polygon points="682,428 778,428 764,472 696,472" fill="#8C1E2C"/>
+<ellipse cx="730" cy="429" rx="52" ry="11" fill="#B0263A"/>
+<ellipse cx="730" cy="419" rx="32" ry="11" fill="#C6364A"/>
+<polygon points="888,432 970,432 958,470 898,470" fill="#FFFFFF"/>
+<ellipse cx="929" cy="434" rx="45" ry="10" fill="#F0EBDC"/>
+<ellipse cx="929" cy="425" rx="15" ry="9" fill="#B0263A"/>
+<circle cx="508" cy="520" r="34" fill="#C8871A" stroke="#8C5C0A" stroke-width="3"/>
+<text x="508" y="521" font-family="DejaVu Sans, Arial, sans-serif" font-size="32" font-weight="bold" fill="#F3E6BE" text-anchor="middle" dominant-baseline="central">$</text>
+<circle cx="562" cy="552" r="28" fill="#C8871A" stroke="#8C5C0A" stroke-width="3"/>
+<text x="562" y="553" font-family="DejaVu Sans, Arial, sans-serif" font-size="26" font-weight="bold" fill="#F3E6BE" text-anchor="middle" dominant-baseline="central">$</text>
+<circle cx="470" cy="566" r="24" fill="#C8871A" stroke="#8C5C0A" stroke-width="3"/>
+<text x="470" y="567" font-family="DejaVu Sans, Arial, sans-serif" font-size="22" font-weight="bold" fill="#F3E6BE" text-anchor="middle" dominant-baseline="central">$</text>
+</svg>
