@@ -43,3 +43,13 @@ A future `date` hides the post until that time (rebuild needed). `draft: true` h
 ## Daily automation workflow
 
 A scheduled task drafts 2–4 articles each morning on a new branch `drafts/YYYY-MM-DD`, runs `node build.js` to make sure it builds, and opens a pull request titled `खबर ड्राफ्ट: YYYY-MM-DD`. The owner reviews on GitHub and merges to publish. Never push articles straight to `main`.
+
+## Cover images (every new article)
+
+Every article gets a cover (`image`, `imageAlt`, `imageCredit`). In order of preference:
+
+1. **A real photo we have rights to** that genuinely matches the story: US government public-domain images, or Wikimedia Commons files under CC0 / CC BY / CC BY-SA (credit format: `तस्वीर: <author> / Wikimedia Commons (<license>)`). Reuse files already in `static/images/` when they fit (e.g. `nepal-cricket-tu-ground2.png` for TU ground, Kirtipur).
+2. Otherwise an **original सागरपारि graphic**: a flat SVG illustration, 1200×675, no text in the image, in the house palette (background `#e8eef5`, navy `#1f5d8c`/`#174a70`, teal `#0f7a68`, red `#b0283b`, gold `#c8891d`, greys `#b4c4d6`/`#cbd8e6`). Symbolic objects only (passport, ballot box, gavel, house, mountains, cricket ball…). Render with `tools/render-cover.mjs` to `static/images/YYYY-MM-DD-slug.png`, credit `चित्र: सागरपारि ग्राफिक`. Look at the PNG before committing.
+3. **AI images**: only symbolic scenes (no real or realistic people, no recreation of the actual event, no logos of other outlets), and the credit must say `चित्र: AI बाट बनाइएको (सांकेतिक)`. Never present an AI image as a photo of the news event.
+
+Never copy photos from news sites, social media or Google Images.

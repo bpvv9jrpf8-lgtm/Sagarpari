@@ -7,6 +7,9 @@ source: "ICC — Schedule announced for ICC U19 Women's T20 World Cup 2027 in Ba
 sourceUrl: "https://www.icc-cricket.com/media-releases/schedule-announced-for-icc-u19-women-s-t20-world-cup-2027-in-bangladesh-and-nepal"
 source1: "The Kathmandu Post — Nepal to host 15 matches at 2027 Under-19 Women's T20 World Cup"
 sourceUrl1: "https://kathmandupost.com/cricket/2026/10/21/nepal-to-host-15-matches-at-2027-under-19-women-s-t20-world-cup"
+image: "/images/nepal-cricket-tu-ground2.png"
+imageAlt: "कीर्तिपुरस्थित त्रिभुवन विश्वविद्यालय क्रिकेट मैदान"
+imageCredit: "तस्वीर: Godknowme1 / Wikimedia Commons (CC BY-SA 4.0)"
 author: "सागरपारि डेस्क"
 draft: false
 ---
