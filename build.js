@@ -140,6 +140,8 @@ ${ogImage ? `<meta property="og:image" content="${ogImage}">` : ""}
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#0F3B5F">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="alternate" type="application/rss+xml" title="${esc(site.name)}" href="/feed.xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
