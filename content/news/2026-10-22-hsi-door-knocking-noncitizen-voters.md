@@ -7,6 +7,9 @@ source: "CBS News (AOL मार्फत) — Armed federal agents knock on doo
 sourceUrl: "https://aol.com/articles/armed-federal-agents-knock-doors-182022000.html"
 source1: "ProPublica — Inside Trump's failed hunt for noncitizen voters (पृष्ठभूमि)"
 sourceUrl1: "https://www.propublica.org/article/noncitizen-voting-trump-homeland-security-investigations"
+image: "/images/2026-10-22-hsi-door-knocking-noncitizen-voters.png"
+imageAlt: "घरको ढोका, मतपत्र र मतपेटिकाको चित्र"
+imageCredit: "चित्र: सागरपारि ग्राफिक"
 author: "सागरपारि डेस्क"
 draft: false
 ---
