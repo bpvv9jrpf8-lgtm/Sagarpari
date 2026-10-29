@@ -53,3 +53,13 @@ Every article gets a cover (`image`, `imageAlt`, `imageCredit`). In order of pre
 3. **AI images**: only symbolic scenes (no real or realistic people, no recreation of the actual event, no logos of other outlets), and the credit must say `चित्र: AI बाट बनाइएको (सांकेतिक)`. Never present an AI image as a photo of the news event.
 
 Never copy photos from news sites, social media or Google Images.
+
+After adding or changing a cover, run `python3 tools/make-webp.py` and commit the `.webp` it writes next to the `.png` (5–15x smaller; `build.js` serves it to browsers automatically and keeps the `.png` for Facebook/WhatsApp previews). If Pillow isn't installed, skip it — the site still works with the PNG.
+
+## SEO (handled by build.js — don't break it)
+
+- `title` and `summary` are the Google title and description: keep the title under ~70 characters and the summary under 160, with the key words (USCIS, H-1B, TPS, नेपाल…) near the start.
+- Every article page gets NewsArticle + BreadcrumbList structured data, Open Graph/Twitter tags and `max-image-preview:large`; the home page gets WebSite (with search) + NewsMediaOrganization data.
+- `dist/sitemap.xml` (all pages, with dates and images) and `dist/news-sitemap.xml` (last 2 days, for Google News) are rebuilt on every deploy; both are listed in `robots.txt`.
+- Search and 404 pages are `noindex`. `static/og-default.png` is the share image for pages without a cover; `static/logo.png` is the publisher logo.
+- If an article is corrected later, add `updated: <ISO date>` to its frontmatter so Google sees the new modified date.
