@@ -62,6 +62,32 @@ const fmtDate = (d) => new Intl.DateTimeFormat("ne-NP", { dateStyle: "long", tim
 const fmtDateTime = (d) =>
   new Intl.DateTimeFormat("ne-NP", { dateStyle: "long", timeStyle: "short", timeZone: tz }).format(d) + " (ET)";
 
+// ---------- images (size + webp twin, no dependencies) ----------
+const DEFAULT_IMAGE = "/og-default.png"; // 1200x630 share image for pages without their own
+const dimCache = {};
+function imgDims(src) {
+  if (!src || /^https?:/.test(src)) return null;
+  if (src in dimCache) return dimCache[src];
+  let d = null;
+  try {
+    const b = fs.readFileSync(path.join(ROOT, "static", src));
+    if (b.toString("ascii", 1, 4) === "PNG") d = { w: b.readUInt32BE(16), h: b.readUInt32BE(20) };
+  } catch {}
+  return (dimCache[src] = d);
+}
+function webpOf(src) {
+  if (!src || /^https?:/.test(src)) return null;
+  const w = src.replace(/\.(png|jpe?g)$/i, ".webp");
+  return w !== src && fs.existsSync(path.join(ROOT, "static", w)) ? w : null;
+}
+// <img> with width/height (stops layout jumping) and a small WebP copy when tools/make-webp.py made one.
+function picture(src, alt = "", attrs = ' loading="lazy" decoding="async"') {
+  const d = imgDims(src), w = webpOf(src);
+  const img = `<img src="${esc(src)}" alt="${esc(alt)}"${d ? ` width="${d.w}" height="${d.h}"` : ""}${attrs}>`;
+  return w ? `<picture><source srcset="${esc(w)}" type="image/webp">${img}</picture>` : img;
+}
+const absUrl = (u) => (/^https?:/.test(u) ? u : site.url + u);
+
 function write(rel, html) {
   const file = path.join(OUT, rel);
   fs.mkdirSync(path.dirname(file), { recursive: true });
@@ -119,27 +145,44 @@ const nav = (active) =>
 const coverWave = `<svg class="cover-wave" viewBox="0 0 200 40" preserveAspectRatio="none" aria-hidden="true"><path d="M0 20 Q 12.5 8 25 20 T 50 20 T 75 20 T 100 20 T 125 20 T 150 20 T 175 20 T 200 20 V40 H0Z" fill="currentColor"/></svg>`;
 const wave = `<svg class="wave" viewBox="0 0 1200 14" preserveAspectRatio="none" aria-hidden="true"><path d="M0 7 Q 25 0 50 7 T 100 7 T 150 7 T 200 7 T 250 7 T 300 7 T 350 7 T 400 7 T 450 7 T 500 7 T 550 7 T 600 7 T 650 7 T 700 7 T 750 7 T 800 7 T 850 7 T 900 7 T 950 7 T 1000 7 T 1050 7 T 1100 7 T 1150 7 T 1200 7" fill="none" stroke="currentColor" stroke-width="2"/></svg>`;
 
-function layout({ title, description, url, body, active, ogType = "website", extraHead = "", image }) {
+function layout({ title, description, url, body, active, ogType = "website", extraHead = "", image, imageAlt, noindex = false, jsonld = [], article }) {
   const fullTitle = title ? `${title} | ${site.name}` : `${site.name} — ${site.tagline}`;
   const canonical = site.url + url;
-  const ogImage = image ? (image.startsWith("http") ? image : site.url + image) : "";
+  const desc = description || site.description;
+  const img = image || DEFAULT_IMAGE;
+  const ogImage = absUrl(img);
+  const ogDims = imgDims(img);
+  const ld = jsonld.map((j) => `<script type="application/ld+json">${JSON.stringify(j).replace(/</g, "\\u003c")}</script>`).join("\n");
   return `<!doctype html>
 <html lang="ne">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${esc(fullTitle)}</title>
-<meta name="description" content="${esc(description || site.description)}">
+<meta name="description" content="${esc(desc)}">
+<meta name="robots" content="${noindex ? "noindex, follow" : "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"}">
 <link rel="canonical" href="${canonical}">
 <meta property="og:site_name" content="${esc(site.name)}">
+<meta property="og:locale" content="ne_NP">
 <meta property="og:title" content="${esc(title || site.name)}">
-<meta property="og:description" content="${esc(description || site.description)}">
+<meta property="og:description" content="${esc(desc)}">
 <meta property="og:url" content="${canonical}">
 <meta property="og:type" content="${ogType}">
-${ogImage ? `<meta property="og:image" content="${ogImage}">` : ""}
+<meta property="og:image" content="${ogImage}">
+${ogDims ? `<meta property="og:image:width" content="${ogDims.w}">\n<meta property="og:image:height" content="${ogDims.h}">` : ""}
+<meta property="og:image:alt" content="${esc(imageAlt || title || site.name)}">
+${article ? `<meta property="article:published_time" content="${article.published}">
+<meta property="article:modified_time" content="${article.modified}">
+<meta property="article:section" content="${esc(article.section)}">` : ""}
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${esc(title || site.name)}">
+<meta name="twitter:description" content="${esc(desc)}">
+<meta name="twitter:image" content="${ogImage}">
 <meta name="theme-color" content="#0F3B5F">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+${ld}
 <link rel="alternate" type="application/rss+xml" title="${esc(site.name)}" href="/feed.xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -202,10 +245,10 @@ const meta = (p) =>
   `<p class="meta"><a class="cat-tag" href="/category/${p.cat.slug}/">${p.cat.name}</a><time datetime="${p.date.toISOString()}">${fmtDate(p.date)}</time></p>`;
 
 // Photo if we have one, otherwise a branded cover in the category colour (no copyright risk).
-const thumb = (p, cls = "") =>
+const thumb = (p, cls = "", eager = false) =>
   `<a href="${p.url}" class="thumb ${cls}" tabindex="-1" aria-hidden="true" style="--c:${p.cat.color}">${
     p.image
-      ? `<img src="${p.image}" alt="" loading="lazy">`
+      ? picture(p.image, "", eager ? ' fetchpriority="high" decoding="async"' : undefined)
       : `<span class="cover"><span class="cover-cat">${p.cat.name}</span>${coverWave}</span>`
   }</a>`;
 
@@ -221,6 +264,27 @@ const storyItem = (p, opts = {}) => `<li class="story${opts.thumb ? " has-thumb"
 const headlineItem = (p) => `<li class="headline"><a href="${p.url}">${esc(p.title)}</a><span class="when">${fmtDate(p.date)}</span></li>`;
 
 const emptyState = `<div class="empty"><p>यहाँ अहिलेसम्म कुनै खबर छैन। नयाँ खबर चाँडै आउँदैछ।</p></div>`;
+
+// ---------- structured data (Google rich results) ----------
+const aboutPage = pages.find((p) => p.slug === "about");
+const logoLd = { "@type": "ImageObject", url: `${site.url}/logo.png`, width: 512, height: 512 };
+const orgLd = {
+  "@context": "https://schema.org",
+  "@type": "NewsMediaOrganization",
+  "@id": `${site.url}/#org`,
+  name: site.name,
+  alternateName: "SagarPari",
+  url: `${site.url}/`,
+  logo: logoLd,
+  description: site.description,
+  ...(aboutPage ? { publishingPrinciples: site.url + aboutPage.url } : {}),
+  ...(pages.find((p) => p.slug === "corrections") ? { correctionsPolicy: `${site.url}/corrections/` } : {}),
+};
+const crumbs = (items) => ({
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: items.map(([name, u], i) => ({ "@type": "ListItem", position: i + 1, name, item: site.url + u })),
+});
 
 // ---------- build ----------
 fs.rmSync(OUT, { recursive: true, force: true });
@@ -238,8 +302,9 @@ copyDir(path.join(ROOT, "static"), OUT);
   const body = lead
     ? `${recentBreaking ? `<a class="breaking" href="${recentBreaking.url}"><span class="breaking-tag">ब्रेकिङ</span><span>${esc(recentBreaking.title)}</span></a>` : ""}
       <section class="front">
+        <h1 class="sr">${esc(site.name)} — ${esc(site.tagline)}</h1>
         <article class="lead">
-          ${thumb(lead, "lg")}
+          ${thumb(lead, "lg", true)}
           ${meta(lead)}
           <h2><a href="${lead.url}">${esc(lead.title)}</a></h2>
           ${lead.summary ? `<p class="dek">${esc(lead.summary)}</p>` : ""}
@@ -264,7 +329,26 @@ copyDir(path.join(ROOT, "static"), OUT);
         )
         .join("")}`
     : emptyState;
-  write("index.html", layout({ url: "/", body, active: "home" }));
+  const homeLd = [
+    orgLd,
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "@id": `${site.url}/#website`,
+      name: site.name,
+      alternateName: "SagarPari",
+      url: `${site.url}/`,
+      inLanguage: "ne",
+      description: site.description,
+      publisher: { "@id": `${site.url}/#org` },
+      potentialAction: {
+        "@type": "SearchAction",
+        target: { "@type": "EntryPoint", urlTemplate: `${site.url}/search/?q={search_term_string}` },
+        "query-input": "required name=search_term_string",
+      },
+    },
+  ];
+  write("index.html", layout({ url: "/", body, active: "home", jsonld: homeLd }));
 }
 
 // Search page + index
@@ -277,6 +361,7 @@ write(
   layout({
     title: "खोज्नुहोस्",
     url: "/search/",
+    noindex: true,
     body: `<header class="page-h"><h1>खोज्नुहोस्</h1></header>
     <form class="search-form" role="search" onsubmit="return false">
       <label for="q" class="sr">खबर खोज्नुहोस्</label>
@@ -304,25 +389,43 @@ for (const c of site.categories) {
   const list = posts.filter((p) => p.category === c.slug);
   const body = `<header class="page-h"><h1>${c.name}</h1><p class="muted">${esc(c.description || "")}</p></header>
     ${list.length ? `<ul class="story-grid">${list.map((p) => storyItem(p, { thumb: true })).join("")}</ul>` : emptyState}`;
-  write(`category/${c.slug}/index.html`, layout({ title: c.name, description: c.description, url: `/category/${c.slug}/`, body, active: c.slug }));
+  write(
+    `category/${c.slug}/index.html`,
+    layout({
+      title: `${c.name} समाचार`,
+      description: `${c.description} अमेरिकामा बस्ने नेपालीका लागि ${c.name}सम्बन्धी ताजा खबर — सागरपारि।`,
+      url: `/category/${c.slug}/`,
+      body,
+      active: c.slug,
+      jsonld: [crumbs([["गृहपृष्ठ", "/"], [c.name, `/category/${c.slug}/`]])],
+    })
+  );
 }
 
 // Articles
 for (const p of posts) {
   const related = posts.filter((x) => x.category === p.category && x.slug !== p.slug).slice(0, 4);
   const shareUrl = encodeURIComponent(site.url + p.url);
+  const published = p.date.toISOString();
+  const modified = p.updated && !isNaN(new Date(p.updated)) ? new Date(p.updated).toISOString() : published;
   const jsonld = {
     "@context": "https://schema.org",
     "@type": "NewsArticle",
     headline: p.title,
     description: p.summary || "",
-    datePublished: p.date.toISOString(),
-    dateModified: p.updated ? new Date(p.updated).toISOString() : p.date.toISOString(),
+    datePublished: published,
+    dateModified: modified,
     inLanguage: "ne",
-    mainEntityOfPage: site.url + p.url,
-    author: { "@type": "Organization", name: p.author || site.name },
-    publisher: { "@type": "Organization", name: site.name },
-    ...(p.image ? { image: [p.image.startsWith("http") ? p.image : site.url + p.image] } : {}),
+    articleSection: p.cat.name,
+    isAccessibleForFree: true,
+    mainEntityOfPage: { "@type": "WebPage", "@id": site.url + p.url },
+    image: [absUrl(p.image || DEFAULT_IMAGE)],
+    author: {
+      "@type": "Organization",
+      name: p.author || "सागरपारि डेस्क",
+      url: aboutPage ? site.url + aboutPage.url : `${site.url}/`,
+    },
+    publisher: { "@type": "NewsMediaOrganization", "@id": `${site.url}/#org`, name: site.name, logo: logoLd },
   };
   const sources = [];
   for (let i = 0; i < 5; i++) {
@@ -336,7 +439,7 @@ for (const p of posts) {
       ${p.summary ? `<p class="standfirst">${esc(p.summary)}</p>` : ""}
       <p class="byline">${esc(p.author || "सागरपारि डेस्क")} · ${fmtDateTime(p.date)} · ${neNum(readMins(p))} मिनेट पढाइ${p.updated ? ` · अद्यावधिक: ${fmtDate(new Date(p.updated))}` : ""}</p>
     </header>
-    ${p.image ? `<figure class="hero-img"><img src="${p.image}" alt="${esc(p.imageAlt || "")}">${p.imageCredit ? `<figcaption>${esc(p.imageCredit)}</figcaption>` : ""}</figure>` : ""}
+    ${p.image ? `<figure class="hero-img">${picture(p.image, p.imageAlt || p.title, ' fetchpriority="high" decoding="async"')}${p.imageCredit ? `<figcaption>${esc(p.imageCredit)}</figcaption>` : ""}</figure>` : ""}
     <div class="prose">${p.html}</div>
     ${sources.length ? `<aside class="sources"><h2>स्रोत</h2><p>${sources.join("<br>")}</p></aside>` : ""}
     <div class="share">
@@ -357,7 +460,9 @@ for (const p of posts) {
       active: p.category,
       ogType: "article",
       image: p.image,
-      extraHead: `<script type="application/ld+json">${JSON.stringify(jsonld)}</script>`,
+      imageAlt: p.imageAlt,
+      article: { published, modified, section: p.cat.name },
+      jsonld: [jsonld, crumbs([["गृहपृष्ठ", "/"], [p.cat.name, `/category/${p.cat.slug}/`], [p.title, p.url]])],
     })
   );
 }
@@ -374,35 +479,82 @@ write(
   layout({
     title: "पेज भेटिएन",
     url: "/404.html",
+    noindex: true,
     body: `<div class="empty"><h1>यो पेज भेटिएन</h1><p>लिंक पुरानो वा गलत हुन सक्छ। <a href="/">गृहपृष्ठमा फर्कनुहोस्</a> र ताजा खबर हेर्नुहोस्।</p></div>`,
   })
 );
 
 // RSS
+const lastBuild = (posts[0] ? posts[0].date : new Date()).toUTCString();
+const enclosure = (p) => {
+  if (!p.image || /^https?:/.test(p.image)) return "";
+  try {
+    const size = fs.statSync(path.join(ROOT, "static", p.image)).size;
+    return `<enclosure url="${site.url}${esc(p.image)}" length="${size}" type="image/png"/>`;
+  } catch {
+    return "";
+  }
+};
 write(
   "feed.xml",
   `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0"><channel>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel>
 <title>${esc(site.name)}</title><link>${site.url}/</link><description>${esc(site.description)}</description><language>ne</language>
+<atom:link href="${site.url}/feed.xml" rel="self" type="application/rss+xml"/>
+<lastBuildDate>${lastBuild}</lastBuildDate>
+<image><url>${site.url}/logo.png</url><title>${esc(site.name)}</title><link>${site.url}/</link></image>
 ${posts
-  .slice(0, 30)
+  .slice(0, 50)
   .map(
     (p) =>
-      `<item><title>${esc(p.title)}</title><link>${site.url}${p.url}</link><guid>${site.url}${p.url}</guid><pubDate>${p.date.toUTCString()}</pubDate><category>${esc(p.cat.name)}</category><description>${esc(p.summary || "")}</description></item>`
+      `<item><title>${esc(p.title)}</title><link>${site.url}${p.url}</link><guid isPermaLink="true">${site.url}${p.url}</guid><pubDate>${p.date.toUTCString()}</pubDate><category>${esc(p.cat.name)}</category><description>${esc(p.summary || "")}</description>${enclosure(p)}</item>`
   )
   .join("\n")}
 </channel></rss>`
 );
 
-// Sitemap + robots
-const urls = ["/", ...site.categories.map((c) => `/category/${c.slug}/`), ...posts.map((p) => p.url), ...pages.map((p) => p.url)];
+// Sitemaps + robots
+const iso = (d) => d.toISOString();
+const postMod = (p) => (p.updated && !isNaN(new Date(p.updated)) ? new Date(p.updated) : p.date);
+const newest = (list) => (list.length ? iso(postMod(list.reduce((a, b) => (postMod(a) > postMod(b) ? a : b)))) : null);
+const entries = [
+  { u: "/", mod: newest(posts) },
+  ...site.categories.map((c) => ({ u: `/category/${c.slug}/`, mod: newest(posts.filter((p) => p.category === c.slug)) })),
+  ...posts.map((p) => ({ u: p.url, mod: iso(postMod(p)), img: p.image })),
+  ...pages.map((p) => ({ u: p.url, mod: null })),
+];
 write(
   "sitemap.xml",
   `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls.map((u) => `<url><loc>${site.url}${u}</loc></url>`).join("\n")}
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+${entries
+  .map(
+    (e) =>
+      `<url><loc>${site.url}${e.u}</loc>${e.mod ? `<lastmod>${e.mod}</lastmod>` : ""}${
+        e.img ? `<image:image><image:loc>${esc(absUrl(e.img))}</image:loc></image:image>` : ""
+      }</url>`
+  )
+  .join("\n")}
 </urlset>`
 );
-write("robots.txt", `User-agent: *\nAllow: /\nSitemap: ${site.url}/sitemap.xml\n`);
+
+// Google News sitemap: only articles from the last 2 days (Google's rule), max 1000.
+const newsPosts = posts.filter((p) => Date.now() - p.date < 2 * 24 * 3600 * 1000).slice(0, 1000);
+write(
+  "news-sitemap.xml",
+  `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
+${newsPosts
+  .map(
+    (p) =>
+      `<url><loc>${site.url}${p.url}</loc><news:news><news:publication><news:name>${esc(site.name)}</news:name><news:language>ne</news:language></news:publication><news:publication_date>${iso(p.date)}</news:publication_date><news:title>${esc(p.title)}</news:title></news:news></url>`
+  )
+  .join("\n")}
+</urlset>`
+);
+write(
+  "robots.txt",
+  `User-agent: *\nAllow: /\nDisallow: /search.json\n\nSitemap: ${site.url}/sitemap.xml\nSitemap: ${site.url}/news-sitemap.xml\n`
+);
 
 console.log(`Built ${posts.length} articles, ${pages.length} pages → dist/`);
