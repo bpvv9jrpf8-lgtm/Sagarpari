@@ -145,6 +145,10 @@ const nav = (active) =>
 const coverWave = `<svg class="cover-wave" viewBox="0 0 200 40" preserveAspectRatio="none" aria-hidden="true"><path d="M0 20 Q 12.5 8 25 20 T 50 20 T 75 20 T 100 20 T 125 20 T 150 20 T 175 20 T 200 20 V40 H0Z" fill="currentColor"/></svg>`;
 const wave = `<svg class="wave" viewBox="0 0 1200 14" preserveAspectRatio="none" aria-hidden="true"><path d="M0 7 Q 25 0 50 7 T 100 7 T 150 7 T 200 7 T 250 7 T 300 7 T 350 7 T 400 7 T 450 7 T 500 7 T 550 7 T 600 7 T 650 7 T 700 7 T 750 7 T 800 7 T 850 7 T 900 7 T 950 7 T 1000 7 T 1050 7 T 1100 7 T 1150 7 T 1200 7" fill="none" stroke="currentColor" stroke-width="2"/></svg>`;
 
+// Google AdSense (pub-8106953949051393) — injected into <head> of every page via layout()
+const adsenseHead = `<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8106953949051393"
+     crossorigin="anonymous"></script>`;
+
 function layout({ title, description, url, body, active, ogType = "website", extraHead = "", image, imageAlt, noindex = false, jsonld = [], article }) {
   const fullTitle = title ? `${title} | ${site.name}` : `${site.name} — ${site.tagline}`;
   const canonical = site.url + url;
@@ -188,6 +192,7 @@ ${ld}
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Khand:wght@500;600;700&family=Mukta:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/style.css">
+${adsenseHead}
 ${extraHead}
 </head>
 <body>
