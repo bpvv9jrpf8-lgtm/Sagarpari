@@ -1,8 +1,3 @@
 # sagarpari.com — ads.txt (authorized digital sellers)
-#
-# ⚠️ Kries ले गर्नुपर्ने: Google AdSense स्वीकृत भएपछि तलको लाइनमा
-# "pub-XXXXXXXXXXXXXXXX" को ठाउँमा आफ्नो असली Publisher ID
-# (pub- पछिको १६ अङ्कको नम्बर) हाल्नुहोस् र यो टिप्पणी हटाउनुहोस्।
-# Publisher ID AdSense खाताको Settings → Account information मा भेटिन्छ।
-#
-google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0
+# Publisher ID: pub-8106953949051393 (Google AdSense, updated 2026-10-30)
+google.com, pub-8106953949051393, DIRECT, f08c47fec0942fa0
