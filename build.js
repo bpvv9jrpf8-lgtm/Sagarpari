@@ -29,7 +29,16 @@ function parseFrontmatter(raw) {
 
 function inline(s) {
   s = esc(s);
-  s = s.replace(/!\[([^\]]*)\]\(([^)\s]+)\)/g, '<img src="$2" alt="$1" loading="lazy">');
+  s = s.replace(/!\[([^\]]*)\]\(([^)\s]+)\)/g, (_, alt, src) => {
+    // Body images get the same treatment as template images: width/height (no layout
+    // shift) and a WebP <picture> twin when one exists. src/alt arrive already escaped.
+    const raw = src.replace(/&amp;/g, "&");
+    const local = !/^https?:/.test(raw);
+    const d = local ? imgDims(raw) : null;
+    const w = local ? webpOf(raw) : null;
+    const img = `<img src="${src}" alt="${alt}"${d ? ` width="${d.w}" height="${d.h}"` : ""} loading="lazy" decoding="async">`;
+    return w ? `<picture><source srcset="${esc(w)}" type="image/webp">${img}</picture>` : img;
+  });
   s = s.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_, t, u) => {
     const ext = /^https?:/.test(u);
     return `<a href="${u}"${ext ? ' target="_blank" rel="noopener"' : ""}>${t}</a>`;
@@ -72,6 +81,21 @@ function imgDims(src) {
   try {
     const b = fs.readFileSync(path.join(ROOT, "static", src));
     if (b.toString("ascii", 1, 4) === "PNG") d = { w: b.readUInt32BE(16), h: b.readUInt32BE(20) };
+    else if (b[0] === 0xff && b[1] === 0xd8) {
+      // JPEG: walk markers to a Start-Of-Frame segment for width/height.
+      let off = 2;
+      while (off + 9 < b.length) {
+        if (b[off] !== 0xff) break;
+        const marker = b[off + 1];
+        if (marker === 0xc0 || marker === 0xc1 || marker === 0xc2) {
+          d = { w: b.readUInt16BE(off + 7), h: b.readUInt16BE(off + 5) };
+          break;
+        }
+        const len = b.readUInt16BE(off + 2);
+        if (len < 2) break;
+        off += 2 + len;
+      }
+    }
   } catch {}
   return (dimCache[src] = d);
 }
@@ -156,6 +180,7 @@ function layout({ title, description, url, body, active, ogType = "website", ext
   const img = image || DEFAULT_IMAGE;
   const ogImage = absUrl(img);
   const ogDims = imgDims(img);
+  const ogType2 = /\.png$/i.test(img) ? "image/png" : /\.jpe?g$/i.test(img) ? "image/jpeg" : /\.webp$/i.test(img) ? "image/webp" : null;
   const ld = jsonld.map((j) => `<script type="application/ld+json">${JSON.stringify(j).replace(/</g, "\\u003c")}</script>`).join("\n");
   return `<!doctype html>
 <html lang="ne">
@@ -173,7 +198,7 @@ function layout({ title, description, url, body, active, ogType = "website", ext
 <meta property="og:url" content="${canonical}">
 <meta property="og:type" content="${ogType}">
 <meta property="og:image" content="${ogImage}">
-${ogDims ? `<meta property="og:image:width" content="${ogDims.w}">\n<meta property="og:image:height" content="${ogDims.h}">` : ""}
+${ogType2 ? `<meta property="og:image:type" content="${ogType2}">` : ""}${ogDims ? `<meta property="og:image:width" content="${ogDims.w}">\n<meta property="og:image:height" content="${ogDims.h}">` : ""}
 <meta property="og:image:alt" content="${esc(imageAlt || title || site.name)}">
 ${article ? `<meta property="article:published_time" content="${article.published}">
 <meta property="article:modified_time" content="${article.modified}">
@@ -410,6 +435,9 @@ for (const c of site.categories) {
 // Articles
 for (const p of posts) {
   const related = posts.filter((x) => x.category === p.category && x.slug !== p.slug).slice(0, 4);
+  // Thin categories: top the page up with a latest-news strip so every article
+  // still recirculates readers to more stories (pageviews/session).
+  const moreNews = related.length < 4 ? posts.filter((x) => x.slug !== p.slug && !related.includes(x)).slice(0, 6) : [];
   const shareUrl = encodeURIComponent(site.url + p.url);
   const published = p.date.toISOString();
   const modified = p.updated && !isNaN(new Date(p.updated)) ? new Date(p.updated).toISOString() : published;
@@ -424,7 +452,11 @@ for (const p of posts) {
     articleSection: p.cat.name,
     isAccessibleForFree: true,
     mainEntityOfPage: { "@type": "WebPage", "@id": site.url + p.url },
-    image: [absUrl(p.image || DEFAULT_IMAGE)],
+    image: (() => {
+      const src = p.image || DEFAULT_IMAGE;
+      const d = imgDims(src);
+      return [d ? { "@type": "ImageObject", url: absUrl(src), width: d.w, height: d.h } : absUrl(src)];
+    })(),
     author: {
       "@type": "Organization",
       name: p.author || "सागरपारि डेस्क",
@@ -454,7 +486,8 @@ for (const p of posts) {
       <a href="https://x.com/intent/post?url=${shareUrl}" target="_blank" rel="noopener">X</a>
     </div>
   </article>
-  ${related.length ? `<section class="related"><h2 class="section-h">${p.cat.name}का अरू खबर</h2><ul class="story-grid">${related.map((p) => storyItem(p, { thumb: true, noDek: true })).join("")}</ul></section>` : ""}`;
+  ${related.length ? `<section class="related"><h2 class="section-h">${p.cat.name}का अरू खबर</h2><ul class="story-grid">${related.map((p) => storyItem(p, { thumb: true, noDek: true })).join("")}</ul></section>` : ""}
+  ${moreNews.length ? `<section class="related"><h2 class="section-h">ताजा खबर</h2><ol class="headline-list">${moreNews.map(headlineItem).join("")}</ol></section>` : ""}`;
   write(
     `news/${p.slug}/index.html`,
     layout({
@@ -495,7 +528,8 @@ const enclosure = (p) => {
   if (!p.image || /^https?:/.test(p.image)) return "";
   try {
     const size = fs.statSync(path.join(ROOT, "static", p.image)).size;
-    return `<enclosure url="${site.url}${esc(p.image)}" length="${size}" type="image/png"/>`;
+    const mt = /\.jpe?g$/i.test(p.image) ? "image/jpeg" : /\.webp$/i.test(p.image) ? "image/webp" : "image/png";
+    return `<enclosure url="${site.url}${esc(p.image)}" length="${size}" type="${mt}"/>`;
   } catch {
     return "";
   }
