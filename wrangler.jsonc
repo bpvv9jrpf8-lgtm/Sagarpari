@@ -5,5 +5,10 @@
     "directory": "./dist",
     "not_found_handling": "404-page",
     "html_handling": "auto-trailing-slash"
-  }
+  },
+  // sagarpari.com Cloudflare account mai chha; deploy garda yo domain Worker sanga aafai jodinchha.
+  "routes": [
+    { "pattern": "sagarpari.com", "custom_domain": true },
+    { "pattern": "www.sagarpari.com", "custom_domain": true }
+  ]
 }
