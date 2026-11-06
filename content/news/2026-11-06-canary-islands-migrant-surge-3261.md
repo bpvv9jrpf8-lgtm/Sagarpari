@@ -2,7 +2,7 @@
 title: "स्पेनको क्यानरी टापुमा आप्रवासीको भीड: ६ दिनमा ३,२६१ जनाको उद्धार"
 date: 2026-11-06T11:35:00-05:00
 category: trending
-summary: "स्पेनको क्यानरी टापुमा नोभेम्बरका पहिला ६ दिनमा ३,२६१ आप्रवासी उद्धार भएपछि क्षेत्रीय नेताले अवस्था 'असह्य' भनेका छन्। एट्लान्टिक बाटो विश्वकै खतरनाकमध्ये एक हो।"
+summary: "स्पेनको क्यानरी टापुमा नोभेम्बरका पहिला ६ दिनमा ३,२६१ आप्रवासी उद्धार भएपछि नेताले अवस्था 'असह्य' भनेका छन्। एट्लान्टिक बाटो विश्वकै खतरनाकमध्ये एक हो।"
 source: "Reuters — Migrant surge to Spain's Canary Islands is unsustainable, authorities say (नोभेम्बर ६, २०२६)"
 sourceUrl: "https://www.reuters.com/world/migrant-surge-spains-canary-islands-is-unsustainable-authorities-say-2026-11-06/"
 image: "/images/2026-11-06-canary-islands-migrant-surge-3261.png"
