@@ -5,6 +5,8 @@ category: nepal
 summary: "टर्कीको अन्ताल्यामा नोभेम्बर ९–२० मा हुने COP31 जलवायु सम्मेलनका लागि परराष्ट्रमन्त्री शिशिर खनालको नेतृत्वमा नेपाली टोली शनिबार प्रस्थान गरेको छ।"
 source: "Nepal News — Foreign Minister Khanal leaves for Türkiye leading Nepali delegation to COP31 (नोभेम्बर ७, २०२६)"
 sourceUrl: "https://english.nepalnews.com/s/nation/foreign-minister-khanal-leaves-for-turkiye-leading-nepali-delegation-to-cop31/"
+source1: "Nepal News — Nepal and Bhutan propose mountain climate agenda for COP31"
+sourceUrl1: "https://english.nepalnews.com/s/climate/nepal-and-bhutan-propose-mountain-climate-agenda-for-cop31/"
 image: "/images/2026-10-31-nepal-bhutan-cop31-mountain-agenda.png"
 imageAlt: "हिउँ पग्लिँदै गरेका हिमाल, नदी र तापक्रम बढेको देखाउने थर्मोमिटरको सांकेतिक चित्र"
 imageCredit: "चित्र: सागरपारि ग्राफिक"
