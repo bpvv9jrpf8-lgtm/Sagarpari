@@ -7,6 +7,8 @@ source: "Onlinekhabar English — Prithvi Highway reopens after Ghoptebhir lands
 sourceUrl: "https://english.onlinekhabar.com/prithvi-highway-reopens-after-ghoptebhir-landslide-clearance-traffic-congestion-persists.html"
 source1: "हिमाल प्रेस — घोप्टेभिरमा सकियो मर्मत, पृथ्वी राजमार्ग दुईतर्फी सञ्चालनमा (कात्तिक २४, २०८३)"
 sourceUrl1: "https://himalpress.com/2026/11/repairs-completed-in-ghoptebhir-prithvi-highway-in-two-way-operation/"
+source2: "कान्तिपुर — घोप्टेभिरमा फेरि पहिरो, पृथ्वी राजमार्ग अवरूद्ध (कात्तिक २४, २०८३)"
+sourceUrl2: "https://ekantipur.com/news/2026/11/10/landslide-in-ghoptebhir-again-prithvi-highway-blocked-36-59.html"
 image: "/images/2026-11-10-prithvi-highway-ghoptebhir-landslide.png"
 imageAlt: "पहाडबाट खसेको पहिरो, सडकमा ढुंगा र पर्खिरहेका गाडीहरूको सांकेतिक चित्र"
 imageCredit: "चित्र: सागरपारि ग्राफिक"
@@ -20,7 +22,7 @@ draft: false
 
 चितवन जिल्ला प्रहरी कार्यालयका अनुसार इच्छाकामना गाउँपालिका–४ स्थित घोप्टेभिरमा सोमबार (नोभेम्बर ९) बिहान करिब ५:३० बजे सुख्खा पहिरो खसेर राजमार्ग दुवैतर्फ बन्द भयो। करिब आठ घण्टा पहिरो पन्छाएपछि दिउँसो २ बजे सडक खुलेको थियो।
 
-तर सोही रात करिब ११:१० बजे सडकमाथिबाट फेरि पहिरो खस्यो र राजमार्ग दोहोर्‍याएर अवरुद्ध भयो। मंगलबार बिहानसम्म आधाजसो पहिरो हटाएर केही समय एकतर्फी मात्र गाडी चलाइएको थियो।
+तर सोही रात करिब ११:१० बजे सडकमाथिबाट फेरि पहिरो खस्यो र राजमार्ग दोहोर्‍याएर अवरुद्ध भयो। जिल्ला प्रहरी कार्यालय, चितवनका प्रवक्ता डीएसपी चन्द्रभुषण यादवले कान्तिपुरलाई रातिको पहिरोले सडक दुवैतर्फ बन्द भएको र पन्छाउने काम भइरहेको जानकारी दिएका थिए। मंगलबार बिहानसम्म आधाजसो पहिरो हटाएर केही समय एकतर्फी मात्र गाडी चलाइएको थियो।
 
 ## अहिलेको अवस्था
 
