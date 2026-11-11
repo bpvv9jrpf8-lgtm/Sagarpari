@@ -269,6 +269,7 @@ ${article ? `<meta property="article:published_time" content="${article.publishe
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.webmanifest">
 ${ld}
 <link rel="alternate" type="application/rss+xml" title="${esc(site.name)}" href="/feed.xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -558,6 +559,9 @@ for (const p of posts) {
   // still recirculates readers to more stories (pageviews/session).
   const moreNews = related.length < 4 ? posts.filter((x) => x.slug !== p.slug && !related.includes(x)).slice(0, 6) : [];
   const shareUrl = encodeURIComponent(site.url + p.url);
+  const shareText = encodeURIComponent(`${p.title} ${site.url}${p.url}`);
+  // Newer / older story links keep readers moving through the site.
+  const idx = posts.indexOf(p), newer = posts[idx - 1], older = posts[idx + 1];
   const published = p.date.toISOString();
   const modified = p.updated && !isNaN(new Date(p.updated)) ? new Date(p.updated).toISOString() : published;
   const jsonld = {
@@ -605,9 +609,19 @@ for (const p of posts) {
     <div class="share">
       <span>सेयर गर्नुहोस्:</span>
       <a href="https://www.facebook.com/sharer/sharer.php?u=${shareUrl}" target="_blank" rel="noopener">Facebook</a>
-      <a href="https://wa.me/?text=${shareUrl}" target="_blank" rel="noopener">WhatsApp</a>
-      <a href="https://x.com/intent/post?url=${shareUrl}" target="_blank" rel="noopener">X</a>
+      <a href="https://wa.me/?text=${shareText}" target="_blank" rel="noopener">WhatsApp</a>
+      <a href="https://x.com/intent/post?url=${shareUrl}&text=${encodeURIComponent(p.title)}" target="_blank" rel="noopener">X</a>
+      <button type="button" class="copy-link" data-url="${site.url}${p.url}" data-title="${esc(p.title)}">लिंक कपी</button>
     </div>
+    <script>
+    (function(){var b=document.querySelector('.copy-link');if(!b)return;
+      b.addEventListener('click',function(){var u=b.dataset.url;
+        if(navigator.share){navigator.share({title:b.dataset.title,url:u}).catch(function(){});return}
+        if(navigator.clipboard){navigator.clipboard.writeText(u).then(function(){b.textContent='कपी भयो ✓';setTimeout(function(){b.textContent='लिंक कपी'},2000)})}});
+      if(navigator.share)b.textContent='सेयर…';
+    })();
+    </script>
+    ${newer || older ? `<nav class="prevnext" aria-label="अघिल्लो र अर्को खबर">${older ? `<a rel="prev" href="${older.url}"><span>← अघिल्लो खबर</span>${esc(older.title)}</a>` : "<span></span>"}${newer ? `<a rel="next" href="${newer.url}"><span>अर्को खबर →</span>${esc(newer.title)}</a>` : "<span></span>"}</nav>` : ""}
   </article>
   ${related.length ? `<section class="related"><h2 class="section-h">${p.cat.name}का अरू खबर</h2><ul class="story-grid">${related.map((p) => storyItem(p, { thumb: true, noDek: true })).join("")}</ul></section>` : ""}
   ${moreNews.length ? `<section class="related"><h2 class="section-h">ताजा खबर</h2><ol class="headline-list">${moreNews.map(headlineItem).join("")}</ol></section>` : ""}`;

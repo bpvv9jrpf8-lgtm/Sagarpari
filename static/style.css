@@ -192,3 +192,13 @@ main.wrap{padding-top:28px;padding-bottom:56px;min-height:50vh}
 .pager a[rel=next]{justify-self:end}
 .pager a:hover{border-color:var(--ocean);color:var(--ocean)}
 .pager-n{color:var(--muted);white-space:nowrap}
+
+/* Article: copy/share button, previous/next story */
+.share button{font:inherit;font-weight:500;padding:6px 14px;border:1px solid var(--line);border-radius:999px;background:none;color:inherit;cursor:pointer}
+.share button:hover{border-color:var(--ocean);color:var(--ocean)}
+.prevnext{display:grid;grid-template-columns:1fr;gap:12px;margin:0 0 40px}
+@media (min-width:720px){.prevnext{grid-template-columns:1fr 1fr}}
+.prevnext a{display:block;padding:14px 16px;border:1px solid var(--line);border-radius:8px;text-decoration:none;font-weight:500;line-height:1.4}
+.prevnext a:hover{border-color:var(--ocean)}
+.prevnext a span{display:block;color:var(--muted);font-size:.9rem;font-weight:400;margin-bottom:2px}
+.prevnext a[rel=next]{text-align:right}
