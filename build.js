@@ -203,6 +203,14 @@ const team = site.team || [];
 const teamUrl = `${site.url}/about/#team`;
 const personLd = (m) => ({ "@type": "Person", name: m.name, ...(m.nameEn ? { alternateName: m.nameEn } : {}), jobTitle: m.roleEn || m.role, url: teamUrl, worksFor: { "@id": `${site.url}/#org` } });
 
+// Default byline (site.json "byline"): articles signed "सागरपारि डेस्क" (or unsigned) show this
+// author and editor. An article with its own `author` / `editor` in frontmatter keeps those.
+const DESK = "सागरपारि डेस्क";
+const byline = site.byline || {};
+const authorOf = (p) => (p.author && p.author !== DESK ? p.author : byline.author || DESK);
+const editorOf = (p) => p.editor || byline.editor || "";
+const member = (name) => team.find((m) => m.name === name || m.nameEn === name);
+
 // Social profiles (site.json "social": { "Facebook": "https://…" }). Empty values are ignored.
 const socialLinks = Object.entries(site.social || {}).filter(([, u]) => /^https:\/\//.test(u || ""));
 
@@ -568,13 +576,14 @@ for (const p of posts) {
       const d = imgDims(src);
       return [d ? { "@type": "ImageObject", url: absUrl(src), width: d.w, height: d.h } : absUrl(src)];
     })(),
-    author: team.find((m) => m.name === p.author || m.nameEn === p.author)
-      ? personLd(team.find((m) => m.name === p.author || m.nameEn === p.author))
+    author: member(authorOf(p))
+      ? personLd(member(authorOf(p)))
       : {
           "@type": "Organization",
-          name: p.author || "सागरपारि डेस्क",
+          name: authorOf(p),
           url: aboutPage ? site.url + aboutPage.url : `${site.url}/`,
         },
+    ...(member(editorOf(p)) ? { editor: personLd(member(editorOf(p))) } : {}),
     publisher: { "@type": "NewsMediaOrganization", "@id": `${site.url}/#org`, name: site.name, logo: logoLd },
   };
   const sources = [];
@@ -587,7 +596,7 @@ for (const p of posts) {
       ${meta(p)}
       <h1>${esc(p.title)}</h1>
       ${p.summary ? `<p class="standfirst">${esc(p.summary)}</p>` : ""}
-      <p class="byline">${esc(p.author || "सागरपारि डेस्क")} · ${fmtDateTime(p.date)} · ${neNum(readMins(p))} मिनेट पढाइ${p.updated ? ` · अद्यावधिक: ${fmtDate(new Date(p.updated))}` : ""}</p>
+      <p class="byline">${member(authorOf(p)) ? `<a href="/about/#team">${esc(authorOf(p))}</a>` : esc(authorOf(p))}${editorOf(p) ? ` · सम्पादक: ${esc(editorOf(p))}` : ""} · ${fmtDateTime(p.date)} · ${neNum(readMins(p))} मिनेट पढाइ${p.updated ? ` · अद्यावधिक: ${fmtDate(new Date(p.updated))}` : ""}</p>
     </header>
     ${p.image ? `<figure class="hero-img">${picture(p.image, p.imageAlt || p.title, ' fetchpriority="high" decoding="async"')}${p.imageCredit ? `<figcaption>${esc(p.imageCredit)}</figcaption>` : ""}</figure>` : ""}
     <div class="prose">${p.html}</div>

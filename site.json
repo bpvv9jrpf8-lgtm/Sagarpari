@@ -45,6 +45,7 @@
     { "name": "अमृता पौडेल", "nameEn": "Amrita Poudel", "role": "सम्पादक", "roleEn": "Editor" },
     { "name": "विक्रम थापा", "nameEn": "Bikram Thapa", "role": "लेखक", "roleEn": "Writer" }
   ],
+  "byline": { "author": "विक्रम थापा", "editor": "अमृता पौडेल" },
   "social": {
     "Facebook": "https://www.facebook.com/share/1CYNYX3VDZ/",
     "YouTube": "",
