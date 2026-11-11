@@ -11,6 +11,15 @@ const site = JSON.parse(fs.readFileSync(path.join(ROOT, "site.json"), "utf8"));
 const esc = (s = "") =>
   String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
+// Cut text at a word boundary so Google/WhatsApp never chop a word in half.
+function clip(s = "", max = 160) {
+  const chars = Array.from(String(s).trim());
+  if (chars.length <= max) return chars.join("");
+  const cut = chars.slice(0, max - 1).join("");
+  const sp = cut.lastIndexOf(" ");
+  return (sp > max * 0.6 ? cut.slice(0, sp) : cut).replace(/[\s,;:–—-]+$/, "") + "…";
+}
+
 function parseFrontmatter(raw) {
   const m = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
   if (!m) return { data: {}, body: raw };
@@ -111,6 +120,13 @@ function picture(src, alt = "", attrs = ' loading="lazy" decoding="async"') {
   return w ? `<picture><source srcset="${esc(w)}" type="image/webp">${img}</picture>` : img;
 }
 const absUrl = (u) => (/^https?:/.test(u) ? u : site.url + u);
+// Small JPEG copy for Facebook/WhatsApp link previews (tools/make-share.py). Big PNGs
+// (0.5–1.9 MB) often fail to show as a preview; the .og.jpg is ~100 KB.
+function shareOf(src) {
+  if (!src || /^https?:/.test(src)) return src;
+  const j = src.replace(/\.(png|jpe?g|webp)$/i, ".og.jpg");
+  return j !== src && fs.existsSync(path.join(ROOT, "static", j)) ? j : src;
+}
 
 function write(rel, html) {
   const file = path.join(OUT, rel);
@@ -157,6 +173,47 @@ const posts = loadDir("content/news")
 
 const pages = loadDir("content/pages").map((p) => ({ ...p, url: `/${p.slug}/` }));
 
+// ---------- topics (hub pages + internal links) ----------
+// site.json "topics": each has slug, name, description and keywords. An article joins a topic
+// when a keyword appears in its title (or its frontmatter says `topics: slug, slug`).
+// English keywords match whole words only (so "DV" doesn't match "DVD").
+const kwTest = (k) => {
+  if (/^[\x20-\x7e]+$/.test(k)) {
+    const re = new RegExp(`(?<![A-Za-z0-9])${k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?![A-Za-z0-9])`, "i");
+    return (s) => re.test(s);
+  }
+  return (s) => s.includes(k);
+};
+const MIN_TOPIC = 3; // no thin hub pages
+const topics = (site.topics || [])
+  .map((t) => {
+    const tests = (t.keywords || []).map(kwTest);
+    const list = posts.filter((p) => {
+      const own = String(p.topics || "").split(",").map((x) => x.trim());
+      return own.includes(t.slug) || tests.some((f) => f(p.title));
+    });
+    return { ...t, url: `/topic/${t.slug}/`, list };
+  })
+  .filter((t) => t.list.length >= MIN_TOPIC);
+for (const p of posts) p.topicList = topics.filter((t) => t.list.includes(p));
+
+// Editorial team (site.json "team"): shown on the About page and in the organization data.
+// An article whose `author` is a team member's name gets that person as its schema author.
+const team = site.team || [];
+const teamUrl = `${site.url}/about/#team`;
+const personLd = (m) => ({ "@type": "Person", name: m.name, ...(m.nameEn ? { alternateName: m.nameEn } : {}), jobTitle: m.roleEn || m.role, url: teamUrl, worksFor: { "@id": `${site.url}/#org` } });
+
+// Default byline (site.json "byline"): articles signed "सागरपारि डेस्क" (or unsigned) show this
+// author and editor. An article with its own `author` / `editor` in frontmatter keeps those.
+const DESK = "सागरपारि डेस्क";
+const byline = site.byline || {};
+const authorOf = (p) => (p.author && p.author !== DESK ? p.author : byline.author || DESK);
+const editorOf = (p) => p.editor || byline.editor || "";
+const member = (name) => team.find((m) => m.name === name || m.nameEn === name);
+
+// Social profiles (site.json "social": { "Facebook": "https://…" }). Empty values are ignored.
+const socialLinks = Object.entries(site.social || {}).filter(([, u]) => /^https:\/\//.test(u || ""));
+
 // ---------- templates ----------
 const nav = (active) =>
   `<nav class="cats" aria-label="खण्डहरू"><ul>
@@ -174,10 +231,11 @@ const adsenseHead = `<script async src="https://pagead2.googlesyndication.com/pa
      crossorigin="anonymous"></script>`;
 
 function layout({ title, description, url, body, active, ogType = "website", extraHead = "", image, imageAlt, noindex = false, jsonld = [], article }) {
-  const fullTitle = title ? `${title} | ${site.name}` : `${site.name} — ${site.tagline}`;
+  // Long headlines: drop the site-name suffix so Google shows more of the headline itself.
+  const fullTitle = title ? (Array.from(title).length > 58 ? title : `${title} | ${site.name}`) : `${site.name} — ${site.tagline}`;
   const canonical = site.url + url;
-  const desc = description || site.description;
-  const img = image || DEFAULT_IMAGE;
+  const desc = clip(description || site.description, 160);
+  const img = shareOf(image || DEFAULT_IMAGE);
   const ogImage = absUrl(img);
   const ogDims = imgDims(img);
   const ogType2 = /\.png$/i.test(img) ? "image/png" : /\.jpe?g$/i.test(img) ? "image/jpeg" : /\.webp$/i.test(img) ? "image/webp" : null;
@@ -211,6 +269,7 @@ ${article ? `<meta property="article:published_time" content="${article.publishe
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.webmanifest">
 ${ld}
 <link rel="alternate" type="application/rss+xml" title="${esc(site.name)}" href="/feed.xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -248,8 +307,10 @@ ${body}
     </div>
     <ul class="foot-links">
       ${pages.map((p) => `<li><a href="${p.url}">${esc(p.title)}</a></li>`).join("")}
+      ${topics.length ? `<li><a href="/topic/">विषयहरू</a></li>` : ""}
       <li><a href="/search/">खोज्नुहोस्</a></li>
       <li><a href="/feed.xml">RSS</a></li>
+      ${socialLinks.map(([name, u]) => `<li><a href="${esc(u)}" target="_blank" rel="noopener me">${esc(name)}</a></li>`).join("")}
     </ul>
   </div>
   <div class="wrap foot-small">© ${new Date().getFullYear()} ${esc(site.name)}</div>
@@ -309,7 +370,40 @@ const orgLd = {
   description: site.description,
   ...(aboutPage ? { publishingPrinciples: site.url + aboutPage.url } : {}),
   ...(pages.find((p) => p.slug === "corrections") ? { correctionsPolicy: `${site.url}/corrections/` } : {}),
+  ...(socialLinks.length ? { sameAs: socialLinks.map(([, u]) => u) } : {}),
+  ...(team.length ? { employee: team.map(personLd) } : {}),
 };
+
+const topicChips = (list) => list.map((t) => `<a class="chip" href="${t.url}">${esc(t.name)}</a>`).join("");
+
+// Paginated listing (category + topic pages): 24 stories per page so pages stay light on phones.
+const PER_PAGE = 24;
+function writeListing({ base, list, h1, lede, title, description, active, trail }) {
+  const n = Math.max(1, Math.ceil(list.length / PER_PAGE));
+  const href = (k) => (k === 1 ? base : `${base}page/${k}/`);
+  for (let i = 1; i <= n; i++) {
+    const slice = list.slice((i - 1) * PER_PAGE, i * PER_PAGE);
+    const pager =
+      n > 1
+        ? `<nav class="pager" aria-label="पृष्ठहरू">${i > 1 ? `<a rel="prev" href="${href(i - 1)}">← नयाँ खबर</a>` : "<span></span>"}<span class="pager-n">पृष्ठ ${neNum(i)} / ${neNum(n)}</span>${i < n ? `<a rel="next" href="${href(i + 1)}">पुराना खबर →</a>` : "<span></span>"}</nav>`
+        : "";
+    const body = `<header class="page-h"><h1>${esc(h1)}</h1><p class="muted">${esc(lede || "")}</p></header>
+    ${slice.length ? `<ul class="story-grid">${slice.map((p) => storyItem(p, { thumb: true })).join("")}</ul>${pager}` : emptyState}`;
+    const suffix = i > 1 ? ` — पृष्ठ ${neNum(i)}` : "";
+    write(
+      `${href(i).slice(1)}index.html`,
+      layout({
+        title: title + suffix,
+        description: description + suffix,
+        url: href(i),
+        body,
+        active,
+        extraHead: `${i > 1 ? `<link rel="prev" href="${site.url}${href(i - 1)}">` : ""}${i < n ? `<link rel="next" href="${site.url}${href(i + 1)}">` : ""}`,
+        jsonld: [crumbs(trail)],
+      })
+    );
+  }
+}
 const crumbs = (items) => ({
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
@@ -347,6 +441,7 @@ copyDir(path.join(ROOT, "static"), OUT);
           ${latest.length ? `<ol class="headline-list">${latest.map(headlineItem).join("")}</ol>` : `<p class="muted">थप खबर चाँडै।</p>`}
         </aside>
       </section>
+      ${topics.length ? `<nav class="topic-strip" aria-label="विषयहरू"><span class="topic-strip-h">विषय:</span>${topicChips([...topics].sort((a, b) => b.list[0].date - a.list[0].date).slice(0, 10))}</nav>` : ""}
       ${blocks
         .map(
           ({ c, list }) => `<section class="block" style="--c:${c.color}">
@@ -416,29 +511,57 @@ write(
 
 // Category pages
 for (const c of site.categories) {
-  const list = posts.filter((p) => p.category === c.slug);
-  const body = `<header class="page-h"><h1>${c.name}</h1><p class="muted">${esc(c.description || "")}</p></header>
-    ${list.length ? `<ul class="story-grid">${list.map((p) => storyItem(p, { thumb: true })).join("")}</ul>` : emptyState}`;
+  writeListing({
+    base: `/category/${c.slug}/`,
+    list: posts.filter((p) => p.category === c.slug),
+    h1: c.name,
+    lede: c.description,
+    title: `${c.name} समाचार`,
+    description: `${c.description} अमेरिकामा बस्ने नेपालीका लागि ${c.name}सम्बन्धी ताजा खबर — सागरपारि।`,
+    active: c.slug,
+    trail: [["गृहपृष्ठ", "/"], [c.name, `/category/${c.slug}/`]],
+  });
+}
+
+// Topic hub pages (/topic/dv-lottery/ …) + an index of all topics
+for (const t of topics) {
+  writeListing({
+    base: t.url,
+    list: t.list,
+    h1: t.name,
+    lede: t.description,
+    title: `${t.name} — ताजा खबर र अपडेट`,
+    description: `${t.description} ${t.name}सम्बन्धी सबै खबर एकै ठाउँमा — सागरपारि।`,
+    trail: [["गृहपृष्ठ", "/"], ["विषयहरू", "/topic/"], [t.name, t.url]],
+  });
+}
+if (topics.length) {
   write(
-    `category/${c.slug}/index.html`,
+    "topic/index.html",
     layout({
-      title: `${c.name} समाचार`,
-      description: `${c.description} अमेरिकामा बस्ने नेपालीका लागि ${c.name}सम्बन्धी ताजा खबर — सागरपारि।`,
-      url: `/category/${c.slug}/`,
-      body,
-      active: c.slug,
-      jsonld: [crumbs([["गृहपृष्ठ", "/"], [c.name, `/category/${c.slug}/`]])],
+      title: "विषयहरू",
+      description: "DV, H-1B, TPS, ग्रीन कार्ड, NPL लगायत विषयअनुसार सागरपारिका सबै खबर।",
+      url: "/topic/",
+      body: `<header class="page-h"><h1>विषयहरू</h1><p class="muted">विषयअनुसार खबर खोज्नुहोस्।</p></header>
+      <ul class="topic-list">${topics.map((t) => `<li><a href="${t.url}">${esc(t.name)}</a><span class="muted">${neNum(t.list.length)} खबर</span><p class="dek">${esc(t.description || "")}</p></li>`).join("")}</ul>`,
+      jsonld: [crumbs([["गृहपृष्ठ", "/"], ["विषयहरू", "/topic/"]])],
     })
   );
 }
 
 // Articles
 for (const p of posts) {
-  const related = posts.filter((x) => x.category === p.category && x.slug !== p.slug).slice(0, 4);
+  // Same-topic stories first (DV with DV, NPL with NPL), then the rest of the category.
+  const sameTopic = posts.filter((x) => x !== p && x.topicList.some((t) => p.topicList.includes(t)));
+  const sameCat = posts.filter((x) => x.category === p.category && x !== p && !sameTopic.includes(x));
+  const related = [...sameTopic, ...sameCat].slice(0, 4);
   // Thin categories: top the page up with a latest-news strip so every article
   // still recirculates readers to more stories (pageviews/session).
   const moreNews = related.length < 4 ? posts.filter((x) => x.slug !== p.slug && !related.includes(x)).slice(0, 6) : [];
   const shareUrl = encodeURIComponent(site.url + p.url);
+  const shareText = encodeURIComponent(`${p.title} ${site.url}${p.url}`);
+  // Newer / older story links keep readers moving through the site.
+  const idx = posts.indexOf(p), newer = posts[idx - 1], older = posts[idx + 1];
   const published = p.date.toISOString();
   const modified = p.updated && !isNaN(new Date(p.updated)) ? new Date(p.updated).toISOString() : published;
   const jsonld = {
@@ -457,11 +580,14 @@ for (const p of posts) {
       const d = imgDims(src);
       return [d ? { "@type": "ImageObject", url: absUrl(src), width: d.w, height: d.h } : absUrl(src)];
     })(),
-    author: {
-      "@type": "Organization",
-      name: p.author || "सागरपारि डेस्क",
-      url: aboutPage ? site.url + aboutPage.url : `${site.url}/`,
-    },
+    author: member(authorOf(p))
+      ? personLd(member(authorOf(p)))
+      : {
+          "@type": "Organization",
+          name: authorOf(p),
+          url: aboutPage ? site.url + aboutPage.url : `${site.url}/`,
+        },
+    ...(member(editorOf(p)) ? { editor: personLd(member(editorOf(p))) } : {}),
     publisher: { "@type": "NewsMediaOrganization", "@id": `${site.url}/#org`, name: site.name, logo: logoLd },
   };
   const sources = [];
@@ -474,17 +600,28 @@ for (const p of posts) {
       ${meta(p)}
       <h1>${esc(p.title)}</h1>
       ${p.summary ? `<p class="standfirst">${esc(p.summary)}</p>` : ""}
-      <p class="byline">${esc(p.author || "सागरपारि डेस्क")} · ${fmtDateTime(p.date)} · ${neNum(readMins(p))} मिनेट पढाइ${p.updated ? ` · अद्यावधिक: ${fmtDate(new Date(p.updated))}` : ""}</p>
+      <p class="byline">${member(authorOf(p)) ? `<a href="/about/#team">${esc(authorOf(p))}</a>` : esc(authorOf(p))}${editorOf(p) ? ` · सम्पादक: ${esc(editorOf(p))}` : ""} · ${fmtDateTime(p.date)} · ${neNum(readMins(p))} मिनेट पढाइ${p.updated ? ` · अद्यावधिक: ${fmtDate(new Date(p.updated))}` : ""}</p>
     </header>
     ${p.image ? `<figure class="hero-img">${picture(p.image, p.imageAlt || p.title, ' fetchpriority="high" decoding="async"')}${p.imageCredit ? `<figcaption>${esc(p.imageCredit)}</figcaption>` : ""}</figure>` : ""}
     <div class="prose">${p.html}</div>
     ${sources.length ? `<aside class="sources"><h2>स्रोत</h2><p>${sources.join("<br>")}</p></aside>` : ""}
+    ${p.topicList.length ? `<p class="topics"><span>विषय:</span>${topicChips(p.topicList)}</p>` : ""}
     <div class="share">
       <span>सेयर गर्नुहोस्:</span>
       <a href="https://www.facebook.com/sharer/sharer.php?u=${shareUrl}" target="_blank" rel="noopener">Facebook</a>
-      <a href="https://wa.me/?text=${shareUrl}" target="_blank" rel="noopener">WhatsApp</a>
-      <a href="https://x.com/intent/post?url=${shareUrl}" target="_blank" rel="noopener">X</a>
+      <a href="https://wa.me/?text=${shareText}" target="_blank" rel="noopener">WhatsApp</a>
+      <a href="https://x.com/intent/post?url=${shareUrl}&text=${encodeURIComponent(p.title)}" target="_blank" rel="noopener">X</a>
+      <button type="button" class="copy-link" data-url="${site.url}${p.url}" data-title="${esc(p.title)}">लिंक कपी</button>
     </div>
+    <script>
+    (function(){var b=document.querySelector('.copy-link');if(!b)return;
+      b.addEventListener('click',function(){var u=b.dataset.url;
+        if(navigator.share){navigator.share({title:b.dataset.title,url:u}).catch(function(){});return}
+        if(navigator.clipboard){navigator.clipboard.writeText(u).then(function(){b.textContent='कपी भयो ✓';setTimeout(function(){b.textContent='लिंक कपी'},2000)})}});
+      if(navigator.share)b.textContent='सेयर…';
+    })();
+    </script>
+    ${newer || older ? `<nav class="prevnext" aria-label="अघिल्लो र अर्को खबर">${older ? `<a rel="prev" href="${older.url}"><span>← अघिल्लो खबर</span>${esc(older.title)}</a>` : "<span></span>"}${newer ? `<a rel="next" href="${newer.url}"><span>अर्को खबर →</span>${esc(newer.title)}</a>` : "<span></span>"}</nav>` : ""}
   </article>
   ${related.length ? `<section class="related"><h2 class="section-h">${p.cat.name}का अरू खबर</h2><ul class="story-grid">${related.map((p) => storyItem(p, { thumb: true, noDek: true })).join("")}</ul></section>` : ""}
   ${moreNews.length ? `<section class="related"><h2 class="section-h">ताजा खबर</h2><ol class="headline-list">${moreNews.map(headlineItem).join("")}</ol></section>` : ""}`;
@@ -507,8 +644,12 @@ for (const p of posts) {
 
 // Static pages
 for (const p of pages) {
-  const body = `<article class="article"><header><h1>${esc(p.title)}</h1></header><div class="prose">${p.html}</div></article>`;
-  write(`${p.slug}/index.html`, layout({ title: p.title, description: p.description, url: p.url, body }));
+  const teamHtml =
+    p.slug === "about" && team.length
+      ? `<h2 id="team">हाम्रो टिम</h2><ul class="team">${team.map((m) => `<li><strong>${esc(m.name)}</strong>${m.nameEn ? ` (${esc(m.nameEn)})` : ""} — ${esc(m.role)}</li>`).join("")}</ul>`
+      : "";
+  const body = `<article class="article"><header><h1>${esc(p.title)}</h1></header><div class="prose">${p.html}${teamHtml}</div></article>`;
+  write(`${p.slug}/index.html`, layout({ title: p.title, description: p.description, url: p.url, body, jsonld: p.slug === "about" ? [orgLd] : [] }));
 }
 
 // 404
@@ -559,6 +700,8 @@ const newest = (list) => (list.length ? iso(postMod(list.reduce((a, b) => (postM
 const entries = [
   { u: "/", mod: newest(posts) },
   ...site.categories.map((c) => ({ u: `/category/${c.slug}/`, mod: newest(posts.filter((p) => p.category === c.slug)) })),
+  ...(topics.length ? [{ u: "/topic/", mod: null }] : []),
+  ...topics.map((t) => ({ u: t.url, mod: newest(t.list) })),
   ...posts.map((p) => ({ u: p.url, mod: iso(postMod(p)), img: p.image })),
   ...pages.map((p) => ({ u: p.url, mod: null })),
 ];
@@ -596,4 +739,22 @@ write(
   `User-agent: *\nAllow: /\nDisallow: /search.json\n\nSitemap: ${site.url}/sitemap.xml\nSitemap: ${site.url}/news-sitemap.xml\n`
 );
 
-console.log(`Built ${posts.length} articles, ${pages.length} pages → dist/`);
+console.log(`Built ${posts.length} articles, ${pages.length} pages, ${topics.length} topics → dist/`);
+
+// ---------- quality check (warnings only — the build never fails on these) ----------
+// Lists problems in articles from the last 3 days so they get fixed before/just after publishing.
+{
+  const len = (s) => Array.from(s || "").length;
+  const words = (p) => p.html.replace(/<[^>]+>/g, " ").split(/\s+/).filter(Boolean).length;
+  const issues = (p) => [
+    len(p.title) > 70 && `शीर्षक ${len(p.title)} अक्षर (७० भित्र राख्नुहोस्)`,
+    len(p.summary) > 160 && `सारांश ${len(p.summary)} अक्षर (१६० भित्र राख्नुहोस्)`,
+    words(p) < 250 && `${words(p)} शब्द मात्र (कम्तीमा २५०)`,
+    !p.image && "कभर तस्वीर छैन",
+    !p.sourceUrl && "स्रोतको लिंक छैन",
+  ].filter(Boolean);
+  const bad = posts.map((p) => [p, issues(p)]).filter(([, i]) => i.length);
+  const recent = bad.filter(([p]) => Date.now() - p.date < 3 * 24 * 3600 * 1000);
+  if (bad.length) console.warn(`\n⚠ गुणस्तर जाँच: ${bad.length}/${posts.length} खबरमा सुधार चाहिन्छ (पछिल्लो ३ दिनका ${recent.length} तल)।`);
+  for (const [p, i] of recent) console.warn(`  - ${p.file}: ${i.join("; ")}`);
+}

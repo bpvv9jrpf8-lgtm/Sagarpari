@@ -1,0 +1,14 @@
+{
+  "name": "सागरपारि — अमेरिकामा बस्ने नेपालीका लागि खबर",
+  "short_name": "सागरपारि",
+  "lang": "ne",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#FAFBFC",
+  "theme_color": "#0F3B5F",
+  "icons": [
+    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "/logo.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

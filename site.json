@@ -40,5 +40,34 @@
       "description": "अहिले चर्चामा रहेका अमेरिका र विश्वका खबर, छोटो र स्पष्ट।",
       "color": "#4B3F8C"
     }
+  ],
+  "team": [
+    { "name": "अमृता पौडेल", "nameEn": "Amrita Poudel", "role": "सम्पादक", "roleEn": "Editor" },
+    { "name": "विक्रम थापा", "nameEn": "Bikram Thapa", "role": "लेखक", "roleEn": "Writer" }
+  ],
+  "byline": { "author": "विक्रम थापा", "editor": "अमृता पौडेल" },
+  "social": {
+    "Facebook": "https://www.facebook.com/share/1CYNYX3VDZ/",
+    "YouTube": "",
+    "WhatsApp": ""
+  },
+  "topics": [
+    {"slug": "dv-lottery", "name": "DV चिट्ठा", "description": "DV (डाइभर्सिटी भिसा) चिट्ठाको दर्ता, नतिजा, अदालती आदेश र ठगीबारे सतर्कता।", "keywords": ["DV", "DV-2027", "DV-2028", "डीभी", "डिभी", "डाइभर्सिटी भिसा"]},
+    {"slug": "h1b", "name": "H-1B भिसा", "description": "H-1B भिसाका नियम, शुल्क, लटरी र USCIS का अपडेट।", "keywords": ["H-1B", "H1B", "एच-१बी"]},
+    {"slug": "green-card", "name": "ग्रीन कार्ड", "description": "ग्रीन कार्ड, भिसा बुलेटिन, PERM र स्थायी बसोबाससम्बन्धी खबर।", "keywords": ["ग्रीन कार्ड", "ग्रिन कार्ड", "Green Card", "भिसा बुलेटिन", "PERM"]},
+    {"slug": "tps", "name": "TPS", "description": "Temporary Protected Status (TPS) सम्बन्धी निर्णय, म्याद र अदालती अपडेट।", "keywords": ["TPS", "टीपीएस"]},
+    {"slug": "uscis", "name": "USCIS", "description": "USCIS का नयाँ नियम, शुल्क, फारम र प्रशोधन समयका अपडेट।", "keywords": ["USCIS"]},
+    {"slug": "citizenship", "name": "अमेरिकी नागरिकता", "description": "न्याचुरलाइजेसन, नागरिकता परीक्षा र शपथसम्बन्धी खबर।", "keywords": ["न्याचुरलाइजेसन", "Naturalization", "अमेरिकी नागरिकता", "N-400"]},
+    {"slug": "refugee-asylum", "name": "शरणार्थी र शरण", "description": "शरणार्थी, शरण (asylum) र डिपोर्टेसनसम्बन्धी नियम र अदालती निर्णय।", "keywords": ["शरणार्थी", "Asylum", "डिपोर्ट", "डिपोर्टेसन"]},
+    {"slug": "us-election", "name": "अमेरिकी चुनाव", "description": "अमेरिकाको चुनाव, मतदान र मतदाताका अधिकारसम्बन्धी खबर।", "keywords": ["मिडटर्म", "मध्यावधि", "Early Voting", "मतदाता", "ब्यालेट"]},
+    {"slug": "social-security", "name": "सोसल सेक्युरिटी", "description": "Social Security, SSI र Medicare का भुक्तानी र नियम।", "keywords": ["Social Security", "सोसल सेक्युरिटी", "SSI", "COLA", "Medicare"]},
+    {"slug": "remittance", "name": "रेमिट्यान्स", "description": "नेपालमा पैसा पठाउने, विनिमय दर र रेमिट्यान्सका तथ्यांक।", "keywords": ["रेमिट्यान्स", "रेमिट्यान्", "विप्रेषण"]},
+    {"slug": "gold-price", "name": "सुनचाँदीको भाउ", "description": "नेपालमा सुन र चाँदीको दैनिक भाउ र बजारको अवस्था।", "keywords": ["सुनको", "सुनचाँदी", "सुन–चाँदी", "सुन र चाँदी", "सुन तोला"]},
+    {"slug": "npl", "name": "NPL", "description": "नेपाल प्रिमियर लिग (NPL) का खेल, नतिजा र खेलाडी।", "keywords": ["NPL", "एनपीएल", "नेपाल प्रिमियर लिग"]},
+    {"slug": "cricket", "name": "नेपाली क्रिकेट", "description": "नेपाली राष्ट्रिय क्रिकेट टोलीका खेल, तालिका र नतिजा।", "keywords": ["क्रिकेट", "T20", "टी–२०", "लिग–२", "League 2"]},
+    {"slug": "nepal-flood", "name": "बाढीपहिरो", "description": "नेपालमा बाढी, पहिरो र मौसमको चेतावनीसम्बन्धी खबर।", "keywords": ["बाढी", "पहिरो", "चक्रवात"]},
+    {"slug": "trekking", "name": "पदयात्रा र हिमाल", "description": "नेपालका पदयात्रा मार्ग, आरोहण र पर्यटकसम्बन्धी खबर।", "keywords": ["पदयात्रा", "ट्रेकिङ", "आरोहण", "आरोही", "पर्वतारोह"]},
+    {"slug": "foreign-employment", "name": "वैदेशिक रोजगारी", "description": "खाडी, मलेसिया लगायत देशमा नेपाली कामदारसम्बन्धी खबर।", "keywords": ["वैदेशिक रोजगार", "मलेसिया", "नेपाली कामदार"]},
+    {"slug": "festivals", "name": "चाडपर्व", "description": "दशैं, तिहार, छठ लगायत चाडपर्वका साइत, विधि र खबर।", "keywords": ["दशैं", "तिहार", "छठ पर्व", "छठपर्व", "भाइटीका"]}
   ]
 }
