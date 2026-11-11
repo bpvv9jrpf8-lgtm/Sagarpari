@@ -63,3 +63,8 @@ After adding or changing a cover, run `python3 tools/make-webp.py` and commit th
 - `dist/sitemap.xml` (all pages, with dates and images) and `dist/news-sitemap.xml` (last 2 days, for Google News) are rebuilt on every deploy; both are listed in `robots.txt`.
 - Search and 404 pages are `noindex`. `static/og-default.png` is the share image for pages without a cover; `static/logo.png` is the publisher logo.
 - If an article is corrected later, add `updated: <ISO date>` to its frontmatter so Google sees the new modified date.
+- **Quality check:** `node build.js` ends with a warning list for articles from the last 3 days (title over 70, summary over 160, under 250 words, no cover, no source link). Fix every warning on a new article before opening the PR.
+- **Topics:** `site.json` → `topics` (slug, name, description, keywords). An article joins a topic when a keyword is in its **title**, or via frontmatter `topics: dv-lottery, uscis`. Each topic with 3+ articles gets a hub page `/topic/<slug>/`, chips on its articles, and same-topic "related" links. Put the topic keyword (DV, H-1B, TPS, NPL…) in the title so the article is linked from its hub.
+- Category and topic pages are paginated (24 per page: `/category/nepal/page/2/`).
+- **Share images:** after adding a cover, also run `python3 tools/make-share.py` and commit the `.og.jpg` it writes for covers over 300 KB (used for Facebook/WhatsApp previews).
+- **Social profiles:** fill `site.json` → `social` with full `https://` URLs; they appear in the footer and as `sameAs` in the organization data. Empty values are ignored.

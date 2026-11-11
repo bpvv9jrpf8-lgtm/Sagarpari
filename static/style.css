@@ -173,3 +173,22 @@ main.wrap{padding-top:28px;padding-bottom:56px;min-height:50vh}
 @media (max-width:560px){.today{text-align:left;align-self:flex-start}}
 @media (prefers-reduced-motion:reduce){.thumb img{transition:none}}
 .block-lead .thumb{aspect-ratio:16/9}
+
+/* Topics, pagination */
+.chip{display:inline-block;padding:4px 14px;border:1px solid var(--line);border-radius:999px;text-decoration:none;font-weight:500;font-size:1rem;background:var(--mist);white-space:nowrap}
+.chip:hover{border-color:var(--ocean);color:var(--ocean)}
+.topics{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:24px 0 0;font-size:1rem}
+.topics span{color:var(--muted)}
+.topic-strip{display:flex;gap:8px;align-items:center;overflow-x:auto;scrollbar-width:none;margin:0 0 36px;padding-bottom:4px}
+.topic-strip::-webkit-scrollbar{display:none}
+.topic-strip-h{color:var(--muted);font-weight:500;white-space:nowrap}
+.topic-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr;gap:0 32px}
+@media (min-width:720px){.topic-list{grid-template-columns:1fr 1fr}}
+.topic-list li{padding:14px 0;border-bottom:1px solid var(--line)}
+.topic-list a{font:600 1.4rem/1.2 var(--head);text-decoration:none;color:var(--ocean);margin-right:10px}
+.topic-list a:hover{text-decoration:underline}
+.pager{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;margin:28px 0 0;font-size:1.05rem}
+.pager a{padding:10px 16px;border:1px solid var(--line);border-radius:999px;text-decoration:none;font-weight:500;justify-self:start}
+.pager a[rel=next]{justify-self:end}
+.pager a:hover{border-color:var(--ocean);color:var(--ocean)}
+.pager-n{color:var(--muted);white-space:nowrap}
