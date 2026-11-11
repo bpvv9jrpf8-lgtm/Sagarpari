@@ -2,7 +2,7 @@
 title: "ममता काफ्ले भट्ट हत्या प्रकरणमा नरेश भट्ट तीनवटै अभियोगमा दोषी ठहर"
 date: 2026-11-10T19:55:00-05:00
 category: community
-summary: "प्रिन्स विलियम काउन्टीको ज्यूरीले नरेश भट्टलाई पत्नी ममताको प्रथम श्रेणी हत्या, शव लुकाउने र शवको अपमान गर्ने तीनवटै अभियोगमा दोषी ठहर गर्‍यो। सजाय मार्च १२, २०२७ मा तोकिनेछ।"
+summary: "प्रिन्स विलियम काउन्टीको ज्यूरीले नरेश भट्टलाई पत्नी ममताको हत्या लगायत तीनवटै अभियोगमा दोषी ठहर गर्‍यो। सजाय सुनुवाइ मार्च १२, २०२७ मा हुनेछ।"
 source: "CNN — A Virginia man is convicted of murder after admitting he dismembered his wife"
 sourceUrl: "https://www.cnn.com/2026/11/10/us/naresh-bhatt-murder-trial-virginia?cid=external-feeds_iluminar_meta"
 source1: "Odhan — Naresh Bhatt found guilty on all three counts in Mamta Kafle Bhatt case"
