@@ -197,6 +197,12 @@ const topics = (site.topics || [])
   .filter((t) => t.list.length >= MIN_TOPIC);
 for (const p of posts) p.topicList = topics.filter((t) => t.list.includes(p));
 
+// Editorial team (site.json "team"): shown on the About page and in the organization data.
+// An article whose `author` is a team member's name gets that person as its schema author.
+const team = site.team || [];
+const teamUrl = `${site.url}/about/#team`;
+const personLd = (m) => ({ "@type": "Person", name: m.name, ...(m.nameEn ? { alternateName: m.nameEn } : {}), jobTitle: m.roleEn || m.role, url: teamUrl, worksFor: { "@id": `${site.url}/#org` } });
+
 // Social profiles (site.json "social": { "Facebook": "https://…" }). Empty values are ignored.
 const socialLinks = Object.entries(site.social || {}).filter(([, u]) => /^https:\/\//.test(u || ""));
 
@@ -356,6 +362,7 @@ const orgLd = {
   ...(aboutPage ? { publishingPrinciples: site.url + aboutPage.url } : {}),
   ...(pages.find((p) => p.slug === "corrections") ? { correctionsPolicy: `${site.url}/corrections/` } : {}),
   ...(socialLinks.length ? { sameAs: socialLinks.map(([, u]) => u) } : {}),
+  ...(team.length ? { employee: team.map(personLd) } : {}),
 };
 
 const topicChips = (list) => list.map((t) => `<a class="chip" href="${t.url}">${esc(t.name)}</a>`).join("");
@@ -561,11 +568,13 @@ for (const p of posts) {
       const d = imgDims(src);
       return [d ? { "@type": "ImageObject", url: absUrl(src), width: d.w, height: d.h } : absUrl(src)];
     })(),
-    author: {
-      "@type": "Organization",
-      name: p.author || "सागरपारि डेस्क",
-      url: aboutPage ? site.url + aboutPage.url : `${site.url}/`,
-    },
+    author: team.find((m) => m.name === p.author || m.nameEn === p.author)
+      ? personLd(team.find((m) => m.name === p.author || m.nameEn === p.author))
+      : {
+          "@type": "Organization",
+          name: p.author || "सागरपारि डेस्क",
+          url: aboutPage ? site.url + aboutPage.url : `${site.url}/`,
+        },
     publisher: { "@type": "NewsMediaOrganization", "@id": `${site.url}/#org`, name: site.name, logo: logoLd },
   };
   const sources = [];
@@ -612,8 +621,12 @@ for (const p of posts) {
 
 // Static pages
 for (const p of pages) {
-  const body = `<article class="article"><header><h1>${esc(p.title)}</h1></header><div class="prose">${p.html}</div></article>`;
-  write(`${p.slug}/index.html`, layout({ title: p.title, description: p.description, url: p.url, body }));
+  const teamHtml =
+    p.slug === "about" && team.length
+      ? `<h2 id="team">हाम्रो टिम</h2><ul class="team">${team.map((m) => `<li><strong>${esc(m.name)}</strong>${m.nameEn ? ` (${esc(m.nameEn)})` : ""} — ${esc(m.role)}</li>`).join("")}</ul>`
+      : "";
+  const body = `<article class="article"><header><h1>${esc(p.title)}</h1></header><div class="prose">${p.html}${teamHtml}</div></article>`;
+  write(`${p.slug}/index.html`, layout({ title: p.title, description: p.description, url: p.url, body, jsonld: p.slug === "about" ? [orgLd] : [] }));
 }
 
 // 404
