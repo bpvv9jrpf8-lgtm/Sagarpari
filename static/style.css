@@ -173,3 +173,8 @@ main.wrap{padding-top:28px;padding-bottom:56px;min-height:50vh}
 @media (max-width:560px){.today{text-align:left;align-self:flex-start}}
 @media (prefers-reduced-motion:reduce){.thumb img{transition:none}}
 .block-lead .thumb{aspect-ratio:16/9}
+/* English/Nepali edition switch */
+.lang-switch{flex:none;padding:6px 12px;border:1px solid var(--ocean);border-radius:999px;color:var(--ocean);text-decoration:none;font-weight:600;font-size:.9rem;white-space:nowrap}
+.lang-switch:hover{background:var(--ocean);color:#fff}
+.twin-note{margin:.5rem 0 0;font-weight:600}
+.twin-note a{color:var(--ocean)}
