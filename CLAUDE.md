@@ -40,6 +40,17 @@ A future `date` hides the post until that time (rebuild needed). `draft: true` h
 - Length: 250–600 words. Lead with what changed and who it affects.
 - Don't use images unless we have rights (own photos, official government images that are public domain, or properly licensed).
 
+## English edition (/en/)
+
+The site has an English edition at sagarpari.com/en/ (same categories, same design, language switch in the nav). It exists so readers who prefer English — and Google AdSense, which does not support Nepali as a site language — have full English content. Grow it steadily.
+
+- **Every new article in immigration, jobs, money or community also gets an English version** at `content/en/news/<same filename>.md`. Nepal and trending stories: add an English version when the story matters to the US diaspora or international readers.
+- Same frontmatter as the Nepali file, plus `ne: <nepali-slug>` (the Nepali filename without the date and `.md`). Translate `title`, `summary`, `imageAlt`; write `imageCredit` in English (`Illustration: SagarPari graphic`, `Photo: ... (Public domain)`); `author: SagarPari Desk`; source names in English. Same `date`, `category`, `image`, `sourceUrl`s.
+- Write natural, plain American English, not word-for-word translation. Keep every fact, number and attribution identical to the Nepali version — add nothing that isn't in the sources. Title under ~70 characters, summary under 160.
+- Immigration/legal/tax English articles end with: `*This story is for general information and is not legal advice. Consult an immigration attorney or accredited representative about your own case.*`
+- Skip the English version for horoscopes (राशिफल), daily gold-price notes and very local Nepal items.
+- English static pages live in `content/en/pages/` (same slugs as the Nepali ones). `build.js` links twins automatically (language switch, "Read this story in English", hreflang).
+
 ## Daily automation workflow
 
 A scheduled task drafts 2–4 articles each morning on a new branch `drafts/YYYY-MM-DD`, runs `node build.js` to make sure it builds, and opens a pull request titled `खबर ड्राफ्ट: YYYY-MM-DD`. The owner reviews on GitHub and merges to publish. Never push articles straight to `main`.

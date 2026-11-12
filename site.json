@@ -40,5 +40,36 @@
       "description": "अहिले चर्चामा रहेका अमेरिका र विश्वका खबर, छोटो र स्पष्ट।",
       "color": "#4B3F8C"
     }
-  ]
+  ],
+  "en": {
+    "name": "SagarPari",
+    "tagline": "News for Nepalis in the USA",
+    "description": "Immigration, jobs, money, community and top Nepal news for Nepalis living in the USA — in plain English, with official sources.",
+    "categories": {
+      "immigration": {
+        "name": "Immigration",
+        "description": "Visas, green cards, TPS, citizenship and USCIS updates."
+      },
+      "jobs": {
+        "name": "Jobs",
+        "description": "Work, wage rules, workers' rights and business."
+      },
+      "money": {
+        "name": "Money & Taxes",
+        "description": "Taxes, remittances, banking, insurance and household costs."
+      },
+      "community": {
+        "name": "Community",
+        "description": "Events, achievements and news from Nepali communities across the US."
+      },
+      "nepal": {
+        "name": "Nepal",
+        "description": "The main news from Nepal, short and clear."
+      },
+      "trending": {
+        "name": "Trending",
+        "description": "US and world stories people are talking about, short and clear."
+      }
+    }
+  }
 }
