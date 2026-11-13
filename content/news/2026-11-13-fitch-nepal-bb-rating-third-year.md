@@ -7,6 +7,9 @@ source: "IANS — Nepal retains 'BB-' rating despite rising debt and flood damag
 sourceUrl: "https://asiapost.in/nepal-retains-bb-rating-despite-rising-debt-and-flood-damage/"
 source1: "Asian Lite — Floods hit growth, but Nepal keeps rating (नोभेम्बर १३, २०२६)"
 sourceUrl1: "https://asianlite.com/2026/top-news/floods-hit-growth-but-nepal-keeps-rating/"
+image: "/images/2026-11-13-fitch-nepal-bb-rating.png"
+imageAlt: "काठमाडौं उपत्यकाको हवाई दृश्य"
+imageCredit: "तस्वीर: Muzammil / Wikimedia Commons"
 author: "सागरपारि डेस्क"
 draft: false
 ---
