@@ -3,7 +3,7 @@ title: "New international undergrads in US down 13%, global survey finds"
 date: 2026-11-14T06:50:00-05:00
 category: community
 ne: us-international-undergrads-down-13-percent-survey
-summary: "A survey of 437 universities finds new international undergrads in the US fell 13% this year, with visa policy the top barrier as students turn to Asia and Europe."
+summary: "Survey of 437 universities: new international undergrads in the US fell 13% this year; visa policy is the top barrier as students turn to Asia and Europe."
 source: "ICEF Monitor — Global survey tracks universities' foreign enrolment for 2026 and outlook for 2027 (Nov 12, 2026)"
 sourceUrl: "https://monitor.icef.com/2026/11/global-survey-tracks-universities-foreign-enrolment-for-2026-and-outlook-for-2027/"
 source1: "Reuters (via KELO) — Visa barriers push students from US and UK to Asia and Europe, global survey shows (Nov 12, 2026)"
