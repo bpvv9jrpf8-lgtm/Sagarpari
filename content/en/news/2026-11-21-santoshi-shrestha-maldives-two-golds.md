@@ -27,6 +27,8 @@ In the women's half marathon, Aishath Jinanee Ibrahim of the Maldives finished s
 
 In the men's half marathon, defending champion **Santosh Bikram Bista** of Nepal finished second, just one second behind Kenya's Tairu Chege, who won in 1:18:16. Shifaz Mohamed of the Maldives was third. Chege also won the men's 5km, with Bista again second.
 
+In the open 10km, Hussain Fazil Haroon of the Maldives won the men's race and Aishath Rizmee won the women's. Masters titles went to Karim Makok and Zara Riyaz (10km) and to Aswan Ali and Husna Mohamed (half marathon).
+
 ## Prize money
 
 The total prize purse was 296,000 Maldivian rufiyaa. Half-marathon winners received 25,000 rufiyaa, with 15,000 for second and 10,000 for third. In the 5km, gold, silver and bronze paid 10,000, 8,000 and 6,000 rufiyaa. The Kathmandu Post put Shrestha's total winnings from her two races at about $2,300.
