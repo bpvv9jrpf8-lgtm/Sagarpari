@@ -7,6 +7,11 @@ source: "VisaVerge — USCIS Adds Case-Specific Review for SIJ Petitions, Nov. 2
 sourceUrl: "https://www.visaverge.com/greencard/uscis-requires-case-specific-review-sij-petitions-under/"
 source1: "CubaHeadlines — USCIS Tightens Green Card Rules for Young Immigrants"
 sourceUrl1: "https://www.cubaheadlines.com/articles/346359"
+source2: "USCIS — Policy Manual update: SIJ integrity (Nov. 20, 2026)"
+sourceUrl2: "https://www.uscis.gov/sites/default/files/document/policy-manual-updates/20261120-SIJIntegrity.pdf"
+image: "/images/2026-11-23-uscis-sij-green-card-tighter-review.png"
+imageAlt: "अदालतको आदेश, ग्रिनकार्ड र म्याग्निफाइङ ग्लास देखाइएको चित्र"
+imageCredit: "चित्र: सागरपारि ग्राफिक"
 author: "सागरपारि डेस्क"
 draft: false
 ---
