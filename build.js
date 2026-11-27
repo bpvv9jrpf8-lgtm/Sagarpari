@@ -27,21 +27,32 @@ function parseFrontmatter(raw) {
   return { data, body: m[2] };
 }
 
+// Reject executable and protocol-relative URLs from Markdown.
+function safeUrl(u, image = false) {
+  const value = String(u || "").replace(/&amp;/g, "&").trim();
+  if (/^https?:\/\//i.test(value)) return value;
+  if (/^\/(?!\/)/.test(value)) return value;
+  if (!image && /^(?:#|mailto:)/i.test(value)) return value;
+  return null;
+}
 function inline(s) {
   s = esc(s);
   s = s.replace(/!\[([^\]]*)\]\(([^)\s]+)\)/g, (_, alt, src) => {
     // Body images get the same treatment as template images: width/height (no layout
     // shift) and a WebP <picture> twin when one exists. src/alt arrive already escaped.
-    const raw = src.replace(/&amp;/g, "&");
-    const local = !/^https?:/.test(raw);
+    const raw = safeUrl(src, true);
+    if (!raw) return alt;
+    const local = !/^https?:/i.test(raw);
     const d = local ? imgDims(raw) : null;
     const w = local ? webpOf(raw) : null;
     const img = `<img src="${src}" alt="${alt}"${d ? ` width="${d.w}" height="${d.h}"` : ""} loading="lazy" decoding="async">`;
     return w ? `<picture><source srcset="${esc(w)}" type="image/webp">${img}</picture>` : img;
   });
   s = s.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_, t, u) => {
-    const ext = /^https?:/.test(u);
-    return `<a href="${u}"${ext ? ' target="_blank" rel="noopener"' : ""}>${t}</a>`;
+    const url = safeUrl(u);
+    if (!url) return t;
+    const ext = /^https?:/i.test(url);
+    return `<a href="${esc(url)}"${ext ? ' target="_blank" rel="noopener noreferrer"' : ""}>${t}</a>`;
   });
   s = s.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
   s = s.replace(/(^|[^*])\*([^*]+)\*/g, "$1<em>$2</em>");
@@ -198,9 +209,14 @@ function loadEdition(L) {
       if (!p.title) throw new Error(`Missing title in ${base}/news/${p.file}`);
       return { ...p, date, url: `${L.prefix}/news/${p.slug}/`, cat: catBySlug[p.category] };
     })
-    .filter((p) => p.date <= new Date(Date.now() + 60 * 60 * 1000)) // hide scheduled future posts
+    .filter((p) => p.date <= new Date()) // never publish future-dated posts early
     .sort((a, b) => b.date - a.date);
   const pages = loadDir(`${base}/pages`).map((p) => ({ ...p, url: `${L.prefix}/${p.slug}/` }));
+  const slugs = new Set();
+  for (const p of posts) {
+    if (slugs.has(p.slug)) throw new Error(`Duplicate slug in ${base}/news: ${p.slug}`);
+    slugs.add(p.slug);
+  }
   return { posts, pages };
 }
 
@@ -309,7 +325,7 @@ ${ld}
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Khand:wght@500;600;700&family=Mukta:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/style.css">
-${adsenseHead}
+${L.lang === "en" ? adsenseHead : ""}
 ${extraHead}
 </head>
 <body>
@@ -552,7 +568,12 @@ ${body}
     const sources = [];
     for (let i = 0; i < 5; i++) {
       const n = p[`source${i || ""}`], u = p[`sourceUrl${i || ""}`];
-      if (n) sources.push(u ? `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(n)}</a>` : esc(n));
+      if (n) {
+        const safe = u && safeUrl(u);
+        sources.push(safe && /^https?:\/\//i.test(safe)
+          ? `<a href="${esc(safe)}" target="_blank" rel="noopener noreferrer">${esc(n)}</a>`
+          : esc(n));
+      }
     }
     const twinNote = p.twin
       ? `<p class="twin-note" lang="${other.lang}"><a href="${p.twin.url}" hreflang="${other.lang}">${other.lang === "en" ? "Read this story in English →" : "यो खबर नेपालीमा पढ्नुहोस् →"}</a></p>`
@@ -673,7 +694,10 @@ ${entries
 
 // Google News sitemap: only articles from the last 2 days (Google's rule), max 1000.
 const newsPosts = [...ED.ne.posts.map((p) => [p, "ne"]), ...ED.en.posts.map((p) => [p, "en"])]
-  .filter(([p]) => Date.now() - p.date < 2 * 24 * 3600 * 1000)
+    .filter(([p]) => {
+    const age = Date.now() - p.date.getTime();
+    return age >= 0 && age < 2 * 24 * 3600 * 1000;
+  })
   .slice(0, 1000);
 write(
   "news-sitemap.xml",

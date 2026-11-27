@@ -1,0 +1,34 @@
+name: Build and SEO checks
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Build static site
+        run: npm run build
+      - name: Verify generated SEO and security artifacts
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          const required = ['index.html','en/index.html','robots.txt','sitemap.xml','news-sitemap.xml','_headers','feed.xml','en/feed.xml'];
+          for (const file of required) assert.ok(fs.existsSync('dist/'+file), 'Missing '+file);
+          const home = fs.readFileSync('dist/index.html','utf8');
+          const sitemap = fs.readFileSync('dist/sitemap.xml','utf8');
+          const news = fs.readFileSync('dist/news-sitemap.xml','utf8');
+          assert.match(home, /rel="canonical"/);
+          assert.match(home, /application\/ld\+json/);
+          assert.match(sitemap, /<urlset /);
+          assert.match(news, /<urlset /);
+          console.log('Build + SEO smoke checks passed');
+          NODE
